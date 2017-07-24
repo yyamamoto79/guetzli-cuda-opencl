@@ -1064,6 +1064,27 @@ bool Process(const Params& params, ProcessStats* stats,
   return ok;
 }
 
+static void cmyk2rgb(unsigned char *srcbuf, unsigned char *dstbuf, unsigned long size) {
+	for (int cmykOffset = 0; cmykOffset < size; cmykOffset += 4) {
+		double c = (double)(*srcbuf++);
+		double m = (double)(*srcbuf++);
+		double y = (double)(*srcbuf++);
+		double k = (double)(*srcbuf++);
+		double r = c*k / 255.;
+		double g = m*k / 255.;
+		double b = y*k / 255.;
+		if (r>255.0) r = 255.0;
+		if (r<0.) r = 0.;
+		if (g>255.0) g = 255.0;
+		if (g<0.) g = 0.;
+		if (b>255.0) b = 255.0;
+		if (b<0.) b = 0.;
+		*dstbuf++ = (unsigned char)(r + 0.5);
+		*dstbuf++ = (unsigned char)(g + 0.5);
+		*dstbuf++ = (unsigned char)(b + 0.5);
+	}
+}
+
 bool ProcessUnsupportedJpegData(const Params& params, ProcessStats* stats,
 	const std::string& data,
 	std::string* jpg_out) {
@@ -1081,9 +1102,21 @@ bool ProcessUnsupportedJpegData(const Params& params, ProcessStats* stats,
 	int pitch = tjPixelSize[TJPF_RGB] * width;
 	int size = pitch*height;
 	std::vector<uint8_t> output(size);
-	if (tjDecompress2(handler, (unsigned char*)data.c_str(), data.length(), &output.front(), width, pitch, height, TJPF_RGB, 0) != 0) {
-		fprintf(stderr, "tjDecompress2() failed: %s\n for source color space %i\n", tjGetErrorStr(), jpegColorspace);
-		exit(EXIT_FAILURE);
+	if (jpegColorspace == TJCS_CMYK || jpegColorspace == TJCS_YCCK) {
+		int pitch = tjPixelSize[TJPF_CMYK] * width;
+		int size = pitch*height;
+		std::vector<uint8_t> cmyk_output(size);
+		if (tjDecompress2(handler, (unsigned char*)data.c_str(), data.length(), &cmyk_output.front(), width, pitch, height, TJPF_CMYK, 0) != 0) {
+			fprintf(stderr, "tjDecompress2() failed: %s\n for source color space %i\n", tjGetErrorStr(), jpegColorspace);
+			exit(EXIT_FAILURE);
+		}
+		cmyk2rgb(&cmyk_output.front(), &output.front(), cmyk_output.size());
+	}
+	else {
+		if (tjDecompress2(handler, (unsigned char*)data.c_str(), data.length(), &output.front(), width, pitch, height, TJPF_RGB, 0) != 0) {
+			fprintf(stderr, "tjDecompress2() failed: %s\n for source color space %i\n", tjGetErrorStr(), jpegColorspace);
+			exit(EXIT_FAILURE);
+		}
 	}
 	return Process(params, stats, output, width, height, jpg_out);
 #else
