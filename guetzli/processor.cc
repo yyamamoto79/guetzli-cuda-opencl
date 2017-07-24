@@ -34,7 +34,7 @@
 #include "clguetzli/clguetzli.h"
 
 #ifdef __SUPPORT_FULL_JPEG__
-#include "jpeglib.h"
+#include "turbojpeg.h"
 #endif
 
 namespace guetzli {
@@ -1068,35 +1068,24 @@ bool ProcessUnsupportedJpegData(const Params& params, ProcessStats* stats,
 	const std::string& data,
 	std::string* jpg_out) {
 #ifdef __SUPPORT_FULL_JPEG__
-	struct jpeg_decompress_struct cinfo;
-	struct jpeg_error_mgr jerr;
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_decompress(&cinfo);
-	jpeg_mem_src(&cinfo, (unsigned char*)data.c_str(), data.length());
-
-	int rc = jpeg_read_header(&cinfo, TRUE);
-	if (rc != 1) {
-		fprintf(stderr, "File does not seem to be a normal JPEG\n");
+	tjhandle handler = tjInitDecompress();
+	if (handler == nullptr) {
+		fprintf(stderr, "tjInitDecompress() failed: %s\n", tjGetErrorStr());
 		exit(EXIT_FAILURE);
 	}
-
-	cinfo.out_color_space = JCS_RGB; //force RGB output
-	jpeg_start_decompress(&cinfo);
-	int xsize = cinfo.output_width;
-	int ysize = cinfo.output_height;
-	int pixel_size = cinfo.output_components;
-	unsigned long bmp_size = xsize * ysize * pixel_size;
-	unsigned char *bmp_buffer = (unsigned char*)malloc(bmp_size);
-	int row_stride = cinfo.output_width * cinfo.output_components;
-	JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)
-		((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
-	while (cinfo.output_scanline < cinfo.output_height) {
-		unsigned char *buffer_array[1];
-		buffer_array[0] = bmp_buffer + (cinfo.output_scanline) * row_stride;
-		jpeg_read_scanlines(&cinfo, buffer_array, 1);
+	int width, height, jpegSubsamp, jpegColorspace;
+	if (tjDecompressHeader3(handler, (unsigned char*)data.c_str(), data.length(), &width, &height, &jpegSubsamp, &jpegColorspace)!=0) {
+		fprintf(stderr, "tjDecompressHeader3() failed: %s\n", tjGetErrorStr());
+		exit(EXIT_FAILURE);
 	}
-	std::vector<uint8_t> temp_rgb(bmp_buffer, bmp_buffer + bmp_size);
-	return Process(params, stats, temp_rgb, xsize, ysize, jpg_out);
+	int pitch = tjPixelSize[TJPF_RGB] * width;
+	int size = pitch*height;
+	std::vector<uint8_t> output(size);
+	if (tjDecompress2(handler, (unsigned char*)data.c_str(), data.length(), &output.front(), width, pitch, height, TJPF_RGB, 0) != 0) {
+		fprintf(stderr, "tjDecompress2() failed: %s\n for source color space %i\n", tjGetErrorStr(), jpegColorspace);
+		exit(EXIT_FAILURE);
+	}
+	return Process(params, stats, output, width, height, jpg_out);
 #else
 	fprintf(stderr, "Unsupported input JPEG file (e.g. unsupported "
 		"downsampling mode).\nPlease provide the input image as "
