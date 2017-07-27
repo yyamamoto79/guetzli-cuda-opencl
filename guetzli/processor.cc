@@ -1066,22 +1066,13 @@ bool Process(const Params& params, ProcessStats* stats,
 
 static void cmyk2rgb(unsigned char *srcbuf, unsigned char *dstbuf, unsigned long size) {
 	for (int cmykOffset = 0; cmykOffset < size; cmykOffset += 4) {
-		double c = (double)(*srcbuf++);
-		double m = (double)(*srcbuf++);
-		double y = (double)(*srcbuf++);
-		double k = (double)(*srcbuf++);
-		double r = c*k / 255.;
-		double g = m*k / 255.;
-		double b = y*k / 255.;
-		if (r>255.0) r = 255.0;
-		if (r<0.) r = 0.;
-		if (g>255.0) g = 255.0;
-		if (g<0.) g = 0.;
-		if (b>255.0) b = 255.0;
-		if (b<0.) b = 0.;
-		*dstbuf++ = (unsigned char)(r + 0.5);
-		*dstbuf++ = (unsigned char)(g + 0.5);
-		*dstbuf++ = (unsigned char)(b + 0.5);
+		unsigned char c = *srcbuf++;
+		unsigned char m = *srcbuf++;
+		unsigned char y = *srcbuf++;
+		unsigned char k = *srcbuf++;
+		*dstbuf++ = (c*k + c + 128) >> 8;
+		*dstbuf++ = (m*k + m + 128) >> 8;
+		*dstbuf++ = (y*k + y + 128) >> 8;
 	}
 }
 
