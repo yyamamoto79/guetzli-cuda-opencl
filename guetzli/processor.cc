@@ -1099,6 +1099,8 @@ static void DecompressJpeg(const std::string& data, std::vector<uint8_t> &output
 		buffer_array[0] = &output.front() + (cinfo.output_scanline) * row_stride;
 		jpeg_read_scanlines(&cinfo, buffer_array, 1);
 	}
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
 }
 static void DecompressJpegTurbo(const std::string& data, std::vector<uint8_t> &output, const tjhandle &handler, const int &width, const int &height, const int &jpegColorspace) {
 	int pitch = tjPixelSize[TJPF_RGB] * width;
@@ -1139,6 +1141,7 @@ bool ProcessUnsupportedJpegData(const Params& params, ProcessStats* stats,
 	else {
 		DecompressJpegTurbo(data, output, handler, width, height, jpegColorspace);
 	}
+	tjDestroy(handler);
 	return Process(params, stats, output, width, height, jpg_out);
 #else
 	fprintf(stderr, "Unsupported input JPEG file (e.g. unsupported "
