@@ -1065,6 +1065,7 @@ bool Process(const Params& params, ProcessStats* stats,
   return ok;
 }
 
+#ifdef __SUPPORT_FULL_JPEG__
 static void cmyk2rgb(unsigned char *srcbuf, unsigned char *dstbuf, unsigned long size) {
 	for (int cmykOffset = 0; cmykOffset < size; cmykOffset += 4) {
 		unsigned char c = *srcbuf++;
@@ -1124,6 +1125,8 @@ static void DecompressJpegTurbo(const std::string& data, std::vector<uint8_t> &o
 		}
 	}
 }
+#endif
+
 bool ProcessUnsupportedJpegData(const Params& params, ProcessStats* stats,
 	const std::string& data,
 	std::string* jpg_out) {
