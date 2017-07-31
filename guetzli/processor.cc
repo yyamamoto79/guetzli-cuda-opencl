@@ -35,6 +35,7 @@
 
 #ifdef __SUPPORT_FULL_JPEG__
 #include "jpeglib.h"
+#include "turbojpeg.h"
 #endif
 
 namespace guetzli {
@@ -1064,39 +1065,87 @@ bool Process(const Params& params, ProcessStats* stats,
   return ok;
 }
 
-bool ProcessUnsupportedJpegData(const Params& params, ProcessStats* stats,
-	const std::string& data,
-	std::string* jpg_out) {
 #ifdef __SUPPORT_FULL_JPEG__
+static void cmyk2rgb(unsigned char *srcbuf, unsigned char *dstbuf, unsigned long size) {
+	for (int cmykOffset = 0; cmykOffset < size; cmykOffset += 4) {
+		unsigned char c = *srcbuf++;
+		unsigned char m = *srcbuf++;
+		unsigned char y = *srcbuf++;
+		unsigned char k = *srcbuf++;
+		*dstbuf++ = (c*k + c + 128) >> 8;
+		*dstbuf++ = (m*k + m + 128) >> 8;
+		*dstbuf++ = (y*k + y + 128) >> 8;
+	}
+}
+static void DecompressJpeg(const std::string& data, std::vector<uint8_t> &output, int &width, int &height) {
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_decompress(&cinfo);
 	jpeg_mem_src(&cinfo, (unsigned char*)data.c_str(), data.length());
-
-	int rc = jpeg_read_header(&cinfo, TRUE);
-	if (rc != 1) {
+	if (jpeg_read_header(&cinfo, TRUE) != 1) {
 		fprintf(stderr, "File does not seem to be a normal JPEG\n");
 		exit(EXIT_FAILURE);
 	}
-
 	cinfo.out_color_space = JCS_RGB; //force RGB output
 	jpeg_start_decompress(&cinfo);
-	int xsize = cinfo.output_width;
-	int ysize = cinfo.output_height;
+	width = cinfo.output_width;
+	height = cinfo.output_height;
 	int pixel_size = cinfo.output_components;
-	unsigned long bmp_size = xsize * ysize * pixel_size;
-	unsigned char *bmp_buffer = (unsigned char*)malloc(bmp_size);
+	int size = width * height * pixel_size;
+	output.resize(size);
 	int row_stride = cinfo.output_width * cinfo.output_components;
-	JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)
-		((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
 	while (cinfo.output_scanline < cinfo.output_height) {
 		unsigned char *buffer_array[1];
-		buffer_array[0] = bmp_buffer + (cinfo.output_scanline) * row_stride;
+		buffer_array[0] = &output.front() + (cinfo.output_scanline) * row_stride;
 		jpeg_read_scanlines(&cinfo, buffer_array, 1);
 	}
-	std::vector<uint8_t> temp_rgb(bmp_buffer, bmp_buffer + bmp_size);
-	return Process(params, stats, temp_rgb, xsize, ysize, jpg_out);
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+}
+static void DecompressJpegTurbo(const std::string& data, std::vector<uint8_t> &output, const tjhandle &handler, const int &width, const int &height, const int &jpegColorspace) {
+	int pitch = tjPixelSize[TJPF_RGB] * width;
+	int size = pitch*height;
+	output.resize(size);
+	if (jpegColorspace == TJCS_CMYK || jpegColorspace == TJCS_YCCK) {
+		int pitch = tjPixelSize[TJPF_CMYK] * width;
+		int size = pitch*height;
+
+		std::vector<uint8_t> cmyk_output(size);
+		if (tjDecompress2(handler, (unsigned char*)data.c_str(), data.length(), &cmyk_output.front(), width, pitch, height, TJPF_CMYK, 0) != 0) {
+			fprintf(stderr, "tjDecompress2() failed: %s\n for source color space %i\n", tjGetErrorStr(), jpegColorspace);
+			exit(EXIT_FAILURE);
+		}
+		cmyk2rgb(&cmyk_output.front(), &output.front(), cmyk_output.size());
+	}
+	else {
+		if (tjDecompress2(handler, (unsigned char*)data.c_str(), data.length(), &output.front(), width, pitch, height, TJPF_RGB, 0) != 0) {
+			fprintf(stderr, "tjDecompress2() failed: %s\n for source color space %i\n", tjGetErrorStr(), jpegColorspace);
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+#endif
+
+bool ProcessUnsupportedJpegData(const Params& params, ProcessStats* stats,
+	const std::string& data,
+	std::string* jpg_out) {
+#ifdef __SUPPORT_FULL_JPEG__
+	tjhandle handler = tjInitDecompress();
+	if (handler == nullptr) {
+		fprintf(stderr, "tjInitDecompress() failed: %s\n", tjGetErrorStr());
+		exit(EXIT_FAILURE);
+	}
+	int width, height, jpegSubsamp, jpegColorspace;
+	std::vector<uint8_t> output;
+	if (tjDecompressHeader3(handler, (unsigned char*)data.c_str(), data.length(), &width, &height, &jpegSubsamp, &jpegColorspace) != 0) {
+		DecompressJpeg(data, output, width, height);
+	}
+	else {
+		DecompressJpegTurbo(data, output, handler, width, height, jpegColorspace);
+	}
+	tjDestroy(handler);
+	return Process(params, stats, output, width, height, jpg_out);
 #else
 	fprintf(stderr, "Unsupported input JPEG file (e.g. unsupported "
 		"downsampling mode).\nPlease provide the input image as "
