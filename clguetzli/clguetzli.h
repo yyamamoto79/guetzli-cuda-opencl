@@ -158,6 +158,17 @@ void clAddBorderEx(cl_mem out, const size_t xsize, const size_t ysize, const int
 
 void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step);
 
+void clStartBlockComparions(
+	cl_mem imgOpsinDynamicsBlockList,
+	cl_mem imgMaskXyzScaleBlockList,
+	const cl_mem rgb_orig,
+	const cl_mem mask_x,
+	const cl_mem mask_y,
+	const cl_mem mask_z,
+	const size_t block_width,
+	const size_t block_height,
+	const size_t width,
+	const size_t height);
 class guetzli::OutputImage;
 
 #ifdef __USE_DOUBLE_AS_FLOAT__

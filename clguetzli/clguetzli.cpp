@@ -62,6 +62,27 @@ void clDiffmapOpsinDynamicsImage(
     clReleaseMemObject(mem_result);
 }
 
+void clStartBlockComparions(
+	cl_mem imgOpsinDynamicsBlockList,
+	cl_mem imgMaskXyzScaleBlockList,
+	const cl_mem rgb_orig,
+	const cl_mem mask_x,
+	const cl_mem mask_y,
+	const cl_mem mask_z,
+	const size_t block_width,
+	const size_t block_height,
+	const size_t width,
+	const size_t height) {
+	ocl_args_d_t &ocl = getOcl();
+	cl_kernel kernel = ocl.kernel[KERNEL_STARTBLOCKCOMPARISIONS];
+	clSetKernelArgEx(kernel, &imgOpsinDynamicsBlockList, &imgMaskXyzScaleBlockList, &rgb_orig, &mask_x, &mask_y, &mask_z, &block_width, &block_height, &width, &height);
+	size_t globalWorkSize[2] = { block_width, block_height };
+	cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
+	LOG_CL_RESULT(err);
+	err = clFinish(ocl.commandQueue);
+	LOG_CL_RESULT(err);
+}
+
 void clComputeBlockZeroingOrder(
     guetzli::CoeffData *output_order_batch,
     const channel_info orig_channel[3],

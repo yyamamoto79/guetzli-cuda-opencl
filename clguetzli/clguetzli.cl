@@ -5,6 +5,7 @@
 *         ianhuang@tencent.com
 *         chriskzhou@tencent.com
 */
+#define __USE_OPENCL__
 #ifdef __USE_OPENCL__
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
@@ -3411,6 +3412,55 @@ __device__ double CompareBlockFactor(const channel_info mayout_channel[3],
         }
         return max_err;
     }
+}
+__kernel void clStartBlockComparisionsEx(
+	__global float* imgOpsinDynamicsBlockList,
+	__global float* imgMaskXyzScaleBlockList,
+	__global const unsigned char* rgb_orig,
+	__global const float* mask_x,
+	__global const float* mask_y,
+	__global const float* mask_z,
+    const int block_width, const int block_height,
+	const int width, const int height
+	)
+{
+#define lut kSrgb8ToLinearTable
+    const int block_x = get_global_id(0);
+    const int block_y = get_global_id(1);
+	int block_ix = block_y * block_width + block_x;
+
+	__private float currentR[3 * 8 * 8];
+	float *currentG = currentR + kDCTBlockSize;
+	float *currentB = currentG + kDCTBlockSize;
+
+	for (int iy = 0, i = 0; iy < 8; ++iy) {
+		for (int ix = 0; ix < 8; ++ix, ++i) {
+			int x = min(8 * block_x + ix, width - 1);
+			int y = min(8 * block_y + iy, height - 1);
+			int px = y * width + x;
+
+			currentR[i] = lut[rgb_orig[3 * px]];
+			currentG[i] = lut[rgb_orig[3 * px + 1]];
+			currentB[i] = lut[rgb_orig[3 * px + 2]];
+		}
+	}
+	CalcOpsinDynamicsImage((float(*)[64])currentR);
+	__global float* curR = &imgOpsinDynamicsBlockList[block_ix * 3 * kDCTBlockSize];
+	__global float* curG = curR + kDCTBlockSize;
+	__global float* curB = curG + kDCTBlockSize;
+	for(int i = 0; i < 8 * 8; i++) {
+		curR[i] = currentR[i];
+		curG[i] = currentG[i];
+		curB[i] = currentB[i];
+	}
+
+	int xmin = block_x * 8;
+	int ymin = block_y * 8;
+
+	imgMaskXyzScaleBlockList[block_ix * 3] = mask_x[ymin * width + xmin];
+	imgMaskXyzScaleBlockList[block_ix * 3 + 1] = mask_y[ymin * width + xmin];
+	imgMaskXyzScaleBlockList[block_ix * 3 + 2] = mask_z[ymin * width + xmin];
+#undef lut
 }
 
 #ifdef __USE_DOUBLE_AS_FLOAT__

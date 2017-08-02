@@ -170,43 +170,68 @@ namespace guetzli
         const int block_width = (width + 8 * factor_x - 1) / (8 * factor_x);
         const int block_height = (height + 8 * factor_y - 1) / (8 * factor_y);
         const int num_blocks = block_width * block_height;
-#ifdef __USE_DOUBLE_AS_FLOAT__
-        const float* lut = kSrgb8ToLinearTable;
-#else
-        const double* lut = kSrgb8ToLinearTable;
-#endif
+
         imgOpsinDynamicsBlockList.resize(num_blocks * 3 * kDCTBlockSize);
         imgMaskXyzScaleBlockList.resize(num_blocks * 3);
-        for (int block_y = 0, block_ix = 0; block_y < block_height; ++block_y)
-        {
-            for (int block_x = 0; block_x < block_width; ++block_x, ++block_ix)
-            {
-                float* curR = &imgOpsinDynamicsBlockList[block_ix * 3 * kDCTBlockSize];
-                float* curG = curR + kDCTBlockSize;
-                float* curB = curG + kDCTBlockSize;
 
-                for (int iy = 0, i = 0; iy < 8; ++iy) {
-                    for (int ix = 0; ix < 8; ++ix, ++i) {
-                        int x = std::min(8 * block_x + ix, width - 1);
-                        int y = std::min(8 * block_y + iy, height - 1);
-                        int px = y * width + x;
+		if (MODE_CPU_OPT == g_mathMode) {
+#ifdef __USE_DOUBLE_AS_FLOAT__
+			const float* lut = kSrgb8ToLinearTable;
+#else
+			const double* lut = kSrgb8ToLinearTable;
+#endif
+			for (int block_y = 0, block_ix = 0; block_y < block_height; ++block_y)
+			{
+				for (int block_x = 0; block_x < block_width; ++block_x, ++block_ix)
+				{
+					float* curR = &imgOpsinDynamicsBlockList[block_ix * 3 * kDCTBlockSize];
+					float* curG = curR + kDCTBlockSize;
+					float* curB = curG + kDCTBlockSize;
 
-                        curR[i] = lut[rgb_orig_[3 * px]];
-                        curG[i] = lut[rgb_orig_[3 * px + 1]];
-                        curB[i] = lut[rgb_orig_[3 * px + 2]];
-                    }
-                }
+					for (int iy = 0, i = 0; iy < 8; ++iy) {
+						for (int ix = 0; ix < 8; ++ix, ++i) {
+							int x = std::min(8 * block_x + ix, width - 1);
+							int y = std::min(8 * block_y + iy, height - 1);
+							int px = y * width + x;
 
-                CalcOpsinDynamicsImage((float(*)[64])curR);
+							curR[i] = lut[rgb_orig_[3 * px]];
+							curG[i] = lut[rgb_orig_[3 * px + 1]];
+							curB[i] = lut[rgb_orig_[3 * px + 2]];
+						}
+					}
 
-                int xmin = block_x * 8;
-                int ymin = block_y * 8;
+					CalcOpsinDynamicsImage((float(*)[64])curR);
 
-                imgMaskXyzScaleBlockList[block_ix * 3] = mask_xyz_[0][ymin * width_ + xmin];
-                imgMaskXyzScaleBlockList[block_ix * 3 + 1] = mask_xyz_[1][ymin * width_ + xmin];
-                imgMaskXyzScaleBlockList[block_ix * 3 + 2] = mask_xyz_[2][ymin * width_ + xmin];
-            }
-        }
+					int xmin = block_x * 8;
+					int ymin = block_y * 8;
+
+					imgMaskXyzScaleBlockList[block_ix * 3] = mask_xyz_[0][ymin * width_ + xmin];
+					imgMaskXyzScaleBlockList[block_ix * 3 + 1] = mask_xyz_[1][ymin * width_ + xmin];
+					imgMaskXyzScaleBlockList[block_ix * 3 + 2] = mask_xyz_[2][ymin * width_ + xmin];
+				}
+			}
+		}
+#ifdef __USE_OPENCL__
+		else if (MODE_OPENCL == g_mathMode) {
+			ocl_args_d_t &ocl = getOcl();
+			cl_mem mem_rgb_orig = ocl.allocMem(rgb_orig_.size()*sizeof(uint8_t), rgb_orig_.data());
+			cl_mem mem_imgOpsinDynamicsBlockList = ocl.allocMem(imgOpsinDynamicsBlockList.size()*sizeof(float), imgOpsinDynamicsBlockList.data());
+			cl_mem mem_imgMaskXyzScaleBlockList = ocl.allocMem(imgMaskXyzScaleBlockList.size()*sizeof(float), imgMaskXyzScaleBlockList.data());
+			cl_mem mem_mask_x = ocl.allocMem(mask_xyz_[0].size()*sizeof(float), mask_xyz_[0].data());
+			cl_mem mem_mask_y = ocl.allocMem(mask_xyz_[1].size()*sizeof(float), mask_xyz_[1].data());
+			cl_mem mem_mask_z = ocl.allocMem(mask_xyz_[2].size()*sizeof(float), mask_xyz_[2].data());
+			clStartBlockComparions(mem_imgOpsinDynamicsBlockList, mem_imgMaskXyzScaleBlockList, mem_rgb_orig, mem_mask_x, mem_mask_y, mem_mask_z, block_width, block_height, width, height);
+			clEnqueueReadBuffer(ocl.commandQueue, mem_imgOpsinDynamicsBlockList, false, 0, imgOpsinDynamicsBlockList.size()*sizeof(float), imgOpsinDynamicsBlockList.data(), 0, NULL, NULL);
+			clEnqueueReadBuffer(ocl.commandQueue, mem_imgMaskXyzScaleBlockList, false, 0, imgMaskXyzScaleBlockList.size()*sizeof(float), imgMaskXyzScaleBlockList.data(), 0, NULL, NULL);
+			clFinish(ocl.commandQueue);
+			clReleaseMemObject(mem_rgb_orig);
+			clReleaseMemObject(mem_imgOpsinDynamicsBlockList);
+			clReleaseMemObject(mem_imgMaskXyzScaleBlockList);
+			clReleaseMemObject(mem_mask_x);
+			clReleaseMemObject(mem_mask_y);
+			clReleaseMemObject(mem_mask_z);
+		}
+#endif
     }
 
     void ButteraugliComparatorEx::FinishBlockComparisons() {

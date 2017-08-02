@@ -61,6 +61,7 @@ ocl_args_d_t& getOcl(void)
     ocl.kernel[KERNEL_REMOVEBORDER] = clCreateKernel(ocl.program, "clRemoveBorderEx", &err);
     ocl.kernel[KERNEL_ADDBORDER] = clCreateKernel(ocl.program, "clAddBorderEx", &err);
     ocl.kernel[KERNEL_COMPUTEBLOCKZEROINGORDER] = clCreateKernel(ocl.program, "clComputeBlockZeroingOrderEx", &err);
+	ocl.kernel[KERNEL_STARTBLOCKCOMPARISIONS] = clCreateKernel(ocl.program, "clStartBlockComparisionsEx", &err);
 
     return ocl;
 }
