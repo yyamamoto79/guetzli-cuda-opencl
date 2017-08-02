@@ -36,8 +36,8 @@ enum KernelName {
     KERNEL_REMOVEBORDER,
     KERNEL_ADDBORDER,
     KERNEL_COMPUTEBLOCKZEROINGORDER,
-    KERNEL_COUNT,
-    KERNEL_STARTBLOCKCOMPARISIONS
+    KERNEL_STARTBLOCKCOMPARISIONS,
+	KERNEL_COUNT
 };
 
 #define LOG_CL_RESULT(e)   if (CL_SUCCESS != (e)) { LogError("Error: %s:%d returned %s.\n", __FUNCTION__, __LINE__, TranslateOpenCLError((e)));}
