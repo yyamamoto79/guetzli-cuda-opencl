@@ -63,6 +63,31 @@ void cuDiffmapOpsinDynamicsImage(
     ocu.releaseMem(mem_result);
 }
 
+void cuStartBlockComparions(
+	cu_mem imgOpsinDynamicsBlockList,
+	cu_mem imgMaskXyzScaleBlockList,
+	const cu_mem rgb_orig,
+	const cu_mem mask_x,
+	const cu_mem mask_y,
+	const cu_mem mask_z,
+	const size_t block_width,
+	const size_t block_height,
+	const size_t width,
+	const size_t height) {
+	ocu_args_d_t &ocu = getOcu();
+	CUfunction kernel = ocu.kernel[KERNEL_STARTBLOCKCOMPARISIONS];
+
+	const void *args[] = { &imgOpsinDynamicsBlockList, &imgMaskXyzScaleBlockList, &rgb_orig, &mask_x, &mask_y, &mask_z, &block_width, &block_height, &width, &height };
+	CUresult err = cuLaunchKernel(kernel,
+		BLOCK_COUNT_X(block_width), BLOCK_COUNT_Y(block_height), 1,
+		BLOCK_SIZE_X, BLOCK_SIZE_Y, 1,
+		0,
+		ocu.commandQueue, (void**)args, NULL);
+	LOG_CU_RESULT(err);
+	err = cuFinish(ocu.commandQueue);
+	LOG_CU_RESULT(err);
+}
+
 void cuComputeBlockZeroingOrder(
     guetzli::CoeffData *output_order_batch,
     const channel_info orig_channel[3],

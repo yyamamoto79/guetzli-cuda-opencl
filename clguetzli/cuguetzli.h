@@ -135,6 +135,18 @@ void cuAddBorderEx(cu_mem out, const size_t xsize, const size_t ysize, const int
 
 void cuCalculateDiffmapEx(cu_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step);
 
+void cuStartBlockComparions(
+	cu_mem imgOpsinDynamicsBlockList,
+	cu_mem imgMaskXyzScaleBlockList,
+	const cu_mem rgb_orig,
+	const cu_mem mask_x,
+	const cu_mem mask_y,
+	const cu_mem mask_z,
+	const size_t block_width,
+	const size_t block_height,
+	const size_t width,
+	const size_t height);
+
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
 #endif

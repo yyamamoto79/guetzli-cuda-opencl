@@ -93,6 +93,7 @@ __device__ void coeffcopy(coeff_t *dst, const coeff_t *src, int size);
 __device__ void coeffcopy_g(coeff_t *dst, __global const coeff_t *src, int size);
 __device__ int list_erase(IntFloatPairList* list, int idx);
 __device__ int list_push_back(IntFloatPairList* list, int i, float f);
+__device__ void CalcOpsinDynamicsImage(__private float rgb[3][kDCTBlockSize]);
 
 __kernel void clConvolutionEx(
 	__global float* result,

@@ -232,6 +232,26 @@ namespace guetzli
 			clReleaseMemObject(mem_mask_z);
 		}
 #endif
+#ifdef __USE_CUDA__
+        else if(MODE_CUDA==g_mathMode){
+			ocu_args_d_t &ocu = getOcu();
+			cu_mem mem_rgb_orig = ocu.allocMem(rgb_orig_.size()*sizeof(uint8_t), rgb_orig_.data());
+			cu_mem mem_imgOpsinDynamicsBlockList = ocu.allocMem(imgOpsinDynamicsBlockList.size()*sizeof(float), imgOpsinDynamicsBlockList.data());
+			cu_mem mem_imgMaskXyzScaleBlockList = ocu.allocMem(imgMaskXyzScaleBlockList.size()*sizeof(float), imgMaskXyzScaleBlockList.data());
+			cu_mem mem_mask_x = ocu.allocMem(mask_xyz_[0].size()*sizeof(float), mask_xyz_[0].data());
+			cu_mem mem_mask_y = ocu.allocMem(mask_xyz_[1].size()*sizeof(float), mask_xyz_[1].data());
+			cu_mem mem_mask_z = ocu.allocMem(mask_xyz_[2].size()*sizeof(float), mask_xyz_[2].data());
+			cuStartBlockComparions(mem_imgOpsinDynamicsBlockList, mem_imgMaskXyzScaleBlockList, mem_rgb_orig, mem_mask_x, mem_mask_y, mem_mask_z, block_width, block_height, width, height);
+			cuMemcpyDtoH(imgOpsinDynamicsBlockList.data(), mem_imgOpsinDynamicsBlockList, imgOpsinDynamicsBlockList.size()*sizeof(float));
+			cuMemcpyDtoH(imgMaskXyzScaleBlockList.data(), mem_imgMaskXyzScaleBlockList, imgMaskXyzScaleBlockList.size()*sizeof(float));
+			ocu.releaseMem(mem_rgb_orig);
+			ocu.releaseMem(mem_imgOpsinDynamicsBlockList);
+			ocu.releaseMem(mem_imgMaskXyzScaleBlockList);
+			ocu.releaseMem(mem_mask_x);
+			ocu.releaseMem(mem_mask_y);
+			ocu.releaseMem(mem_mask_z);
+        }
+#endif
     }
 
     void ButteraugliComparatorEx::FinishBlockComparisons() {
