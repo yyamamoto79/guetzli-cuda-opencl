@@ -39,7 +39,7 @@ __device__ double InterpolateClampNegative(__global const double *array, int siz
 __device__ void   XybDiffLowFreqSquaredAccumulate(double r0, double g0, double b0,
                                        double r1, double g1, double b1,
                                        double factor, double res[3]);
-__device__ double DotProduct(__global const float u[3], const double v[3]);
+__device__ double DotProduct(__global const float *u, const double v[3]);
 __device__ void   OpsinAbsorbance(const double in[3], double out[3]);
 __device__ void   RgbToXyb(double r, double g, double b, double *valx, double *valy, double *valz);
 __device__ double Gamma(double v);
@@ -927,7 +927,7 @@ __device__ void Butteraugli8x8CornerEdgeDetectorDiff(
     }
 }
 
-__device__ double DotProduct(__global const float u[3], const double v[3]) {
+__device__ double DotProduct(__global const float *u, const double v[3]) {
     return u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
 }
 
@@ -2820,7 +2820,7 @@ __device__ void CoeffToYUV16x16(__private const coeff_t block[8 * 8], uchar *yuv
     PixelToYUV(pixels, yuv, 16, 16);
 }
 
-__device__ void CoeffToYUV16x16_g(__global const coeff_t block[8 * 8], uchar *yuv, __global const ushort *pixel_orig, int block_x, int block_y, int width_, int height_)
+__device__ void CoeffToYUV16x16_g(__global const coeff_t *block, uchar *yuv, __global const ushort *pixel_orig, int block_x, int block_y, int width_, int height_)
 {
     coeff_t b[8 * 8];
     for (int i = 0; i < 8 * 8; i++)
@@ -2841,7 +2841,7 @@ __device__ void CoeffToYUV8x8(__private const coeff_t block[8 * 8], uchar *yuv)
     PixelToYUV(pixels, yuv, 8, 8);
 }
 
-__device__ void CoeffToYUV8x8_g(__global const coeff_t block[8 * 8], uchar *yuv)
+__device__ void CoeffToYUV8x8_g(__global const coeff_t *block, uchar *yuv)
 {
     coeff_t b[8 * 8];
     for (int i = 0; i < 8 * 8; i++)
