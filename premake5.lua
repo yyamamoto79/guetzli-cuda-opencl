@@ -5,8 +5,14 @@ workspace "guetzli"
   includedirs { ".", "third_party/butteraugli", "clguetzli" }
   libdirs {}
 
+  filter "action:xcode*"
+    includedirs { ".", "third_party/butteraugli", "clguetzli" , "/usr/local/include", "/Developer/NVIDIA/CUDA-8.0/include" }
+    libdirs {"/usr/local/lib", "/usr/local/cuda/lib"}
   filter "action:vs*"
     platforms { "x86_64", "x86" }
+  
+  filter "action:xcode*"
+    platforms {"x86_64"}
 
   filter "platforms:x86"
     architecture "x86"
@@ -48,6 +54,11 @@ workspace "guetzli"
       --links { "OpenCL", "cuda", "profiler", "unwind", "jpeg" }
     filter "action:vs*"
       links { "shlwapi" }
+      
+    filter "action:xcode*"
+      defines { "__USE_OPENCL__", "__USE_CUDA__", "__SUPPORT_FULL_JPEG__" }
+      linkoptions {"-framework OpenCL"}
+      links { "png","turbojpeg","cuda" }
     filter {}
     files
       {
