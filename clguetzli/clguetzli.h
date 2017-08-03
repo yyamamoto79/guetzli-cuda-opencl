@@ -158,8 +158,6 @@ void clAddBorderEx(cl_mem out, const size_t xsize, const size_t ysize, const int
 
 void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step);
 
-class guetzli::OutputImage;
-
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
 #endif

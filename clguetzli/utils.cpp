@@ -25,8 +25,15 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <stdarg.h>
-#include "CL/cl.h"
-#include "CL/cl_ext.h"
+
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#include <OpenCL/cl_ext.h>
+#else
+#include <CL/cl.h>
+#include <CL/cl_ext.h>
+#endif
+
 #include "utils.h"
 #include <assert.h>
 
@@ -70,7 +77,7 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
     int errorCode = CL_SUCCESS;
 
     FILE* fp = NULL;
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     fp = fopen(fileName, "rb");
 #else
     fopen_s(&fp, fileName, "rb");

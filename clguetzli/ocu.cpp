@@ -6,8 +6,8 @@
 #include "ocu.h"
 
 #ifdef __USE_CUDA__
-#include <cuda.h>
-#include <nvrtc.h>
+#include "cuda.h"
+#include "nvrtc.h"
 
 ocu_args_d_t& getOcu(void)
 {

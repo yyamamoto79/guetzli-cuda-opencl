@@ -8,6 +8,7 @@
 #include "cuguetzli.h"
 #include <algorithm>
 #include "ocu.h"
+#include <math.h>
 
 #ifdef __USE_CUDA__
 

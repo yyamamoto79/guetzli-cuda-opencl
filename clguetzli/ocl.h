@@ -8,7 +8,12 @@
 
 #ifdef __USE_OPENCL__
 
-#include "CL/cl.h"
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
+#include <CL/cl.h>
+#endif
+
 #include "utils.h"
 #include "clguetzli.cl.h"
 

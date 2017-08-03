@@ -7,7 +7,12 @@
 */
 #ifdef __USE_OPENCL__
 
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
+
 #include <math.h>
 #include <assert.h>
 #include <vector>

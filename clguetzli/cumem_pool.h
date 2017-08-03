@@ -8,7 +8,7 @@
 #ifdef __USE_CUDA__
 
 #include <list>
-#include <cuda.h>
+#include "cuda.h"
 #include "ocl.h"
 
 /*Simple memory pool for CUDA, aiming to reduce the memory allocation count, because it's time consuming.*/
