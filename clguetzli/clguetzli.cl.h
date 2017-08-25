@@ -1,6 +1,8 @@
 #ifndef __CLGUETZLI_CL_H__
 #define __CLGUETZLI_CL_H__
 
+#ifndef __APPLE__
+
 #ifdef __cplusplus
 #ifndef __CUDACC__
 #include "CL/cl.h"
@@ -149,3 +151,35 @@
     }channel_info;
 
 #endif /*__CLGUETZLI_CL_H__*/
+
+//typedef struct __channel_info_t
+//{
+//    int factor;
+//    int block_width;
+//    int block_height;
+//     const int *coeff;
+//     const short  *pixel;
+//}channel_info;
+//
+//
+//typedef union ocl_channels_t
+//{
+//    struct
+//    {
+//        cl_mem r;
+//        cl_mem g;
+//        cl_mem b;
+//    };
+//    struct
+//    {
+//        cl_mem x;
+//        cl_mem y;
+//        cl_mem b_;
+//    };
+//    union
+//    {
+//        cl_mem ch[3];
+//    };
+//}ocl_channels;
+
+#endif /*__APPLE__*/

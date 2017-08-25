@@ -1,0 +1,606 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2A2060991F2EECF900907482 /* resource in Resources */ = {isa = PBXBuildFile; fileRef = 2A2060981F2EECF900907482 /* resource */; };
+		2A20609B1F2EF36400907482 /* 1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 2A20609A1F2EF36400907482 /* 1.jpg */; };
+		2A20609D1F2EF91D00907482 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A20609C1F2EF91D00907482 /* libz.tbd */; };
+		2AB2CAE81F0353F0004FABCA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2AB2CAE71F0353F0004FABCA /* main.m */; };
+		2AB2CAEB1F0353F0004FABCA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2AB2CAEA1F0353F0004FABCA /* AppDelegate.m */; };
+		2AB2CAEE1F0353F0004FABCA /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2AB2CAED1F0353F0004FABCA /* ViewController.mm */; };
+		2AB2CAF41F0353F0004FABCA /* guetzli_ios_demo.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2AB2CAF21F0353F0004FABCA /* guetzli_ios_demo.xcdatamodeld */; };
+		2AB2CAF61F0353F0004FABCA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2AB2CAF51F0353F0004FABCA /* Assets.xcassets */; };
+		2AB2CB041F0353F0004FABCA /* guetzli_ios_demoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2AB2CB031F0353F0004FABCA /* guetzli_ios_demoTests.m */; };
+		2AB2CB0F1F0353F0004FABCA /* guetzli_ios_demoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2AB2CB0E1F0353F0004FABCA /* guetzli_ios_demoUITests.m */; };
+		2AB2CCA01F036638004FABCA /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AB2CC9E1F036638004FABCA /* libjpeg.a */; };
+		2AB2D0D21F039F0F004FABCA /* libguetzli_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AB2CB5E1F035F6B004FABCA /* libguetzli_ios.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2AB2CB001F0353F0004FABCA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AB2CADB1F0353F0004FABCA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AB2CAE21F0353F0004FABCA;
+			remoteInfo = guetzli_ios_demo;
+		};
+		2AB2CB0B1F0353F0004FABCA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AB2CADB1F0353F0004FABCA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AB2CAE21F0353F0004FABCA;
+			remoteInfo = guetzli_ios_demo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2A2060981F2EECF900907482 /* resource */ = {isa = PBXFileReference; lastKnownFileType = folder; path = resource; sourceTree = "<group>"; };
+		2A20609A1F2EF36400907482 /* 1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = 1.jpg; path = resource/1.jpg; sourceTree = "<group>"; };
+		2A20609C1F2EF91D00907482 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		2AB2CAE31F0353F0004FABCA /* guetzli_ios_demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = guetzli_ios_demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AB2CAE71F0353F0004FABCA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		2AB2CAE91F0353F0004FABCA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		2AB2CAEA1F0353F0004FABCA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		2AB2CAEC1F0353F0004FABCA /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		2AB2CAED1F0353F0004FABCA /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
+		2AB2CAF31F0353F0004FABCA /* guetzli_ios_demo.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = guetzli_ios_demo.xcdatamodel; sourceTree = "<group>"; };
+		2AB2CAF51F0353F0004FABCA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2AB2CAFA1F0353F0004FABCA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2AB2CAFF1F0353F0004FABCA /* guetzli_ios_demoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = guetzli_ios_demoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AB2CB031F0353F0004FABCA /* guetzli_ios_demoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = guetzli_ios_demoTests.m; sourceTree = "<group>"; };
+		2AB2CB051F0353F0004FABCA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2AB2CB0A1F0353F0004FABCA /* guetzli_ios_demoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = guetzli_ios_demoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AB2CB0E1F0353F0004FABCA /* guetzli_ios_demoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = guetzli_ios_demoUITests.m; sourceTree = "<group>"; };
+		2AB2CB101F0353F0004FABCA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2AB2CB5E1F035F6B004FABCA /* libguetzli_ios.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libguetzli_ios.a; sourceTree = "<group>"; };
+		2AB2CC9E1F036638004FABCA /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../lib/libjpeg.a; sourceTree = "<group>"; };
+		2AB2CC9F1F036638004FABCA /* libz.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.dylib; path = ../lib/libz.1.dylib; sourceTree = "<group>"; };
+		2AB2CCA91F0387F7004FABCA /* guetzli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guetzli.h; path = guetzli_ios_demo/guetzli.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2AB2CAE01F0353F0004FABCA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A20609D1F2EF91D00907482 /* libz.tbd in Frameworks */,
+				2AB2D0D21F039F0F004FABCA /* libguetzli_ios.a in Frameworks */,
+				2AB2CCA01F036638004FABCA /* libjpeg.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AB2CAFC1F0353F0004FABCA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AB2CB071F0353F0004FABCA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2AB2CADA1F0353F0004FABCA = {
+			isa = PBXGroup;
+			children = (
+				2A20609A1F2EF36400907482 /* 1.jpg */,
+				2A2060981F2EECF900907482 /* resource */,
+				2AB2CCA91F0387F7004FABCA /* guetzli.h */,
+				2AB2CAE51F0353F0004FABCA /* guetzli_ios_demo */,
+				2AB2CB021F0353F0004FABCA /* guetzli_ios_demoTests */,
+				2AB2CB0D1F0353F0004FABCA /* guetzli_ios_demoUITests */,
+				2AB2CAE41F0353F0004FABCA /* Products */,
+				2AB2CB5D1F035F6B004FABCA /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		2AB2CAE41F0353F0004FABCA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2AB2CAE31F0353F0004FABCA /* guetzli_ios_demo.app */,
+				2AB2CAFF1F0353F0004FABCA /* guetzli_ios_demoTests.xctest */,
+				2AB2CB0A1F0353F0004FABCA /* guetzli_ios_demoUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2AB2CAE51F0353F0004FABCA /* guetzli_ios_demo */ = {
+			isa = PBXGroup;
+			children = (
+				2AB2CB531F0357F8004FABCA /* Base.lproj */,
+				2AB2CAE91F0353F0004FABCA /* AppDelegate.h */,
+				2AB2CAEA1F0353F0004FABCA /* AppDelegate.m */,
+				2AB2CAEC1F0353F0004FABCA /* ViewController.h */,
+				2AB2CAED1F0353F0004FABCA /* ViewController.mm */,
+				2AB2CAF51F0353F0004FABCA /* Assets.xcassets */,
+				2AB2CAFA1F0353F0004FABCA /* Info.plist */,
+				2AB2CAF21F0353F0004FABCA /* guetzli_ios_demo.xcdatamodeld */,
+				2AB2CAE61F0353F0004FABCA /* Supporting Files */,
+			);
+			path = guetzli_ios_demo;
+			sourceTree = "<group>";
+		};
+		2AB2CAE61F0353F0004FABCA /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				2AB2CAE71F0353F0004FABCA /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		2AB2CB021F0353F0004FABCA /* guetzli_ios_demoTests */ = {
+			isa = PBXGroup;
+			children = (
+				2AB2CB031F0353F0004FABCA /* guetzli_ios_demoTests.m */,
+				2AB2CB051F0353F0004FABCA /* Info.plist */,
+			);
+			path = guetzli_ios_demoTests;
+			sourceTree = "<group>";
+		};
+		2AB2CB0D1F0353F0004FABCA /* guetzli_ios_demoUITests */ = {
+			isa = PBXGroup;
+			children = (
+				2AB2CB0E1F0353F0004FABCA /* guetzli_ios_demoUITests.m */,
+				2AB2CB101F0353F0004FABCA /* Info.plist */,
+			);
+			path = guetzli_ios_demoUITests;
+			sourceTree = "<group>";
+		};
+		2AB2CB531F0357F8004FABCA /* Base.lproj */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Base.lproj;
+			sourceTree = "<group>";
+		};
+		2AB2CB5D1F035F6B004FABCA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2A20609C1F2EF91D00907482 /* libz.tbd */,
+				2AB2CC9E1F036638004FABCA /* libjpeg.a */,
+				2AB2CC9F1F036638004FABCA /* libz.1.dylib */,
+				2AB2CB5E1F035F6B004FABCA /* libguetzli_ios.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2AB2CAE21F0353F0004FABCA /* guetzli_ios_demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AB2CB131F0353F0004FABCA /* Build configuration list for PBXNativeTarget "guetzli_ios_demo" */;
+			buildPhases = (
+				2AB2CADF1F0353F0004FABCA /* Sources */,
+				2AB2CAE01F0353F0004FABCA /* Frameworks */,
+				2AB2CAE11F0353F0004FABCA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = guetzli_ios_demo;
+			productName = guetzli_ios_demo;
+			productReference = 2AB2CAE31F0353F0004FABCA /* guetzli_ios_demo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2AB2CAFE1F0353F0004FABCA /* guetzli_ios_demoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AB2CB161F0353F0004FABCA /* Build configuration list for PBXNativeTarget "guetzli_ios_demoTests" */;
+			buildPhases = (
+				2AB2CAFB1F0353F0004FABCA /* Sources */,
+				2AB2CAFC1F0353F0004FABCA /* Frameworks */,
+				2AB2CAFD1F0353F0004FABCA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2AB2CB011F0353F0004FABCA /* PBXTargetDependency */,
+			);
+			name = guetzli_ios_demoTests;
+			productName = guetzli_ios_demoTests;
+			productReference = 2AB2CAFF1F0353F0004FABCA /* guetzli_ios_demoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		2AB2CB091F0353F0004FABCA /* guetzli_ios_demoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AB2CB191F0353F0004FABCA /* Build configuration list for PBXNativeTarget "guetzli_ios_demoUITests" */;
+			buildPhases = (
+				2AB2CB061F0353F0004FABCA /* Sources */,
+				2AB2CB071F0353F0004FABCA /* Frameworks */,
+				2AB2CB081F0353F0004FABCA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2AB2CB0C1F0353F0004FABCA /* PBXTargetDependency */,
+			);
+			name = guetzli_ios_demoUITests;
+			productName = guetzli_ios_demoUITests;
+			productReference = 2AB2CB0A1F0353F0004FABCA /* guetzli_ios_demoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2AB2CADB1F0353F0004FABCA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = com.tencent;
+				TargetAttributes = {
+					2AB2CAE21F0353F0004FABCA = {
+						CreatedOnToolsVersion = 8.2;
+						DevelopmentTeam = UHCLK74DHB;
+						ProvisioningStyle = Automatic;
+					};
+					2AB2CAFE1F0353F0004FABCA = {
+						CreatedOnToolsVersion = 8.2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 2AB2CAE21F0353F0004FABCA;
+					};
+					2AB2CB091F0353F0004FABCA = {
+						CreatedOnToolsVersion = 8.2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 2AB2CAE21F0353F0004FABCA;
+					};
+				};
+			};
+			buildConfigurationList = 2AB2CADE1F0353F0004FABCA /* Build configuration list for PBXProject "guetzli_ios_demo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2AB2CADA1F0353F0004FABCA;
+			productRefGroup = 2AB2CAE41F0353F0004FABCA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2AB2CAE21F0353F0004FABCA /* guetzli_ios_demo */,
+				2AB2CAFE1F0353F0004FABCA /* guetzli_ios_demoTests */,
+				2AB2CB091F0353F0004FABCA /* guetzli_ios_demoUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2AB2CAE11F0353F0004FABCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A20609B1F2EF36400907482 /* 1.jpg in Resources */,
+				2A2060991F2EECF900907482 /* resource in Resources */,
+				2AB2CAF61F0353F0004FABCA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AB2CAFD1F0353F0004FABCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AB2CB081F0353F0004FABCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2AB2CADF1F0353F0004FABCA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AB2CAEE1F0353F0004FABCA /* ViewController.mm in Sources */,
+				2AB2CAEB1F0353F0004FABCA /* AppDelegate.m in Sources */,
+				2AB2CAE81F0353F0004FABCA /* main.m in Sources */,
+				2AB2CAF41F0353F0004FABCA /* guetzli_ios_demo.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AB2CAFB1F0353F0004FABCA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AB2CB041F0353F0004FABCA /* guetzli_ios_demoTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AB2CB061F0353F0004FABCA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AB2CB0F1F0353F0004FABCA /* guetzli_ios_demoUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2AB2CB011F0353F0004FABCA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2AB2CAE21F0353F0004FABCA /* guetzli_ios_demo */;
+			targetProxy = 2AB2CB001F0353F0004FABCA /* PBXContainerItemProxy */;
+		};
+		2AB2CB0C1F0353F0004FABCA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2AB2CAE21F0353F0004FABCA /* guetzli_ios_demo */;
+			targetProxy = 2AB2CB0B1F0353F0004FABCA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2AB2CB111F0353F0004FABCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ming Huang (RMP465DM7N)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ming Huang (RMP465DM7N)";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE = "bdcac7e6-6732-4d44-b09b-ff7539c75d9c";
+				PROVISIONING_PROFILE_SPECIFIER = "bdcac7e6-6732-4d44-b09b-ff7539c75d9c";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2AB2CB121F0353F0004FABCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PROVISIONING_PROFILE = "bdcac7e6-6732-4d44-b09b-ff7539c75d9c";
+				PROVISIONING_PROFILE_SPECIFIER = "bdcac7e6-6732-4d44-b09b-ff7539c75d9c";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		2AB2CB141F0353F0004FABCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ming Huang (RMP465DM7N)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = UHCLK74DHB;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../../third_party/**",
+					"$(PROJECT_DIR)/../../guetzli/",
+					"$(PROJECT_DIR)/../../clguetzli/",
+					"$(PROJECT_DIR)/../../tests/",
+					"$(PROJECT_DIR)/../../",
+					"$(PROJECT_DIR)/../include",
+				);
+				INFOPLIST_FILE = guetzli_ios_demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/../lib",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.mqq.guetzli-ios-demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+			};
+			name = Debug;
+		};
+		2AB2CB151F0353F0004FABCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = UHCLK74DHB;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../../third_party/**",
+					"$(PROJECT_DIR)/../../guetzli/",
+					"$(PROJECT_DIR)/../../clguetzli/",
+					"$(PROJECT_DIR)/../../tests/",
+					"$(PROJECT_DIR)/../../",
+					"$(PROJECT_DIR)/../include",
+				);
+				INFOPLIST_FILE = guetzli_ios_demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/../lib",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.mqq.guetzli-ios-demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+			};
+			name = Release;
+		};
+		2AB2CB171F0353F0004FABCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = guetzli_ios_demoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.mqq.guetzli-ios-demoTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/guetzli_ios_demo.app/guetzli_ios_demo";
+			};
+			name = Debug;
+		};
+		2AB2CB181F0353F0004FABCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = guetzli_ios_demoTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.mqq.guetzli-ios-demoTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/guetzli_ios_demo.app/guetzli_ios_demo";
+			};
+			name = Release;
+		};
+		2AB2CB1A1F0353F0004FABCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = guetzli_ios_demoUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.mqq.guetzli-ios-demoUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = guetzli_ios_demo;
+			};
+			name = Debug;
+		};
+		2AB2CB1B1F0353F0004FABCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = guetzli_ios_demoUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tencent.mqq.guetzli-ios-demoUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = guetzli_ios_demo;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2AB2CADE1F0353F0004FABCA /* Build configuration list for PBXProject "guetzli_ios_demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AB2CB111F0353F0004FABCA /* Debug */,
+				2AB2CB121F0353F0004FABCA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2AB2CB131F0353F0004FABCA /* Build configuration list for PBXNativeTarget "guetzli_ios_demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AB2CB141F0353F0004FABCA /* Debug */,
+				2AB2CB151F0353F0004FABCA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2AB2CB161F0353F0004FABCA /* Build configuration list for PBXNativeTarget "guetzli_ios_demoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AB2CB171F0353F0004FABCA /* Debug */,
+				2AB2CB181F0353F0004FABCA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2AB2CB191F0353F0004FABCA /* Build configuration list for PBXNativeTarget "guetzli_ios_demoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AB2CB1A1F0353F0004FABCA /* Debug */,
+				2AB2CB1B1F0353F0004FABCA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		2AB2CAF21F0353F0004FABCA /* guetzli_ios_demo.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2AB2CAF31F0353F0004FABCA /* guetzli_ios_demo.xcdatamodel */,
+			);
+			currentVersion = 2AB2CAF31F0353F0004FABCA /* guetzli_ios_demo.xcdatamodel */;
+			path = guetzli_ios_demo.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 2AB2CADB1F0353F0004FABCA /* Project object */;
+}

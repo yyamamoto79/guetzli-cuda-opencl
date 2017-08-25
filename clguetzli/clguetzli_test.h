@@ -1,4 +1,5 @@
 #pragma once
+#ifdef __USE_OPENCL__
 #include "ocl.h"
 
 void tclMaskHighIntensityChange(const float* r, const float* g, const float* b,
@@ -70,3 +71,4 @@ void tclOpsinDynamicsImage(const float* r, const float* g, const float* b, size_
 void tclMinSquareVal(const float *img, size_t square_size, size_t offset,
 	size_t xsize, size_t ysize,
 	const float *result);
+#endif

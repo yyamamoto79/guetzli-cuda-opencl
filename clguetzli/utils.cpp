@@ -24,8 +24,15 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <stdarg.h>
+#ifdef __APPLE__
+#define CL_SUCCESS                                  0
+#define CL_OUT_OF_HOST_MEMORY                       -6
+#define CL_INVALID_VALUE                            -30
+#else
 #include "CL/cl.h"
 #include "CL/cl_ext.h"
+#endif
+
 #include "utils.h"
 #include <assert.h>
 
@@ -72,7 +79,11 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
 #ifdef __linux__
     fp = fopen(fileName, "rb");
 #else
+#ifdef __APPLE__
+    fp = fopen(fileName, "rb");
+#else
     fopen_s(&fp, fileName, "rb");
+#endif
 #endif
     if (fp == NULL)
     {

@@ -2,24 +2,17 @@
 #include <vector>
 #include "guetzli/processor.h"
 #include "guetzli/butteraugli_comparator.h"
-#include "ocl.h"
 #include "clguetzli.cl.h"
 
-#include "cuguetzli.h"
 
-enum MATH_MODE
-{
-	MODE_CPU = 0,
-	MODE_CPU_OPT,
-	MODE_OPENCL,
-	MODE_CUDA,
-	MODE_CHECKCL,
-	MODE_CHECKCUDA
-};
+//#import "ometal.h"
+#import "metalguezli.h"
 
-extern MATH_MODE g_mathMode;
 
-#ifdef __USE_OPENCL__
+
+//#define __USE_OPENCL__
+
+
 
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #define double float
@@ -88,7 +81,7 @@ void clSquareSampleEx(
 
 void clBlurEx(cl_mem image/*out, opt*/, const size_t xsize, const size_t ysize,
     const double sigma, const double border_ratio,
-    cl_mem result = nullptr/*out, opt*/);
+    cl_mem result /*out, opt*/);
 
 void clOpsinDynamicsImageEx(ocl_channels &rgb, const size_t xsize, const size_t ysize);
 
@@ -151,31 +144,30 @@ void clAddBorderEx(cl_mem out, const size_t xsize, const size_t ysize, const int
 
 void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step);
 
-class guetzli::OutputImage;
+class OutputImage;
 
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
 #endif
 
-namespace guetzli {
+//namespace guetzli {
+//
+//    class ButteraugliComparatorEx : public ButteraugliComparator
+//    {
+//    public:
+//        ButteraugliComparatorEx(const int width, const int height,
+//            const std::vector<uint8_t>* rgb,
+//            const float target_distance, ProcessStats* stats);
+//
+//        void Compare(const OutputImage& img) override;
+//        void StartBlockComparisons() override;
+//        void FinishBlockComparisons() override;
+//
+//        double CompareBlock(const OutputImage& img, int off_x, int off_y, const coeff_t* candidate_block, const int comp_mask) const override;
+//    public:
+//        std::vector<float> imgOpsinDynamicsBlockList;   // [RR..RRGG..GGBB..BB]:blockCount
+//        std::vector<float> imgMaskXyzScaleBlockList;    // [RGBRGB..RGBRGB]:blockCount
+//        std::vector<std::vector<float>> rgb_orig_opsin;
+//    };
+//}
 
-    class ButteraugliComparatorEx : public ButteraugliComparator
-    {
-    public:
-        ButteraugliComparatorEx(const int width, const int height,
-            const std::vector<uint8_t>* rgb,
-            const float target_distance, ProcessStats* stats);
-
-        void Compare(const OutputImage& img) override;
-        void StartBlockComparisons() override;
-        void FinishBlockComparisons() override;
-
-        double CompareBlock(const OutputImage& img, int off_x, int off_y, const coeff_t* candidate_block, const int comp_mask) const override;
-    public:
-        std::vector<float> imgOpsinDynamicsBlockList;   // [RR..RRGG..GGBB..BB]:blockCount
-        std::vector<float> imgMaskXyzScaleBlockList;    // [RGBRGB..RGBRGB]:blockCount
-        std::vector<std::vector<float>> rgb_orig_opsin;
-    };
-}
-
-#endif

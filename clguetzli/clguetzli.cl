@@ -1,4 +1,8 @@
+
+#ifdef __USE_OPENCL__
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
+
 
 #include  "clguetzli/clguetzli.cl.h"
 
@@ -13,7 +17,7 @@
 #define kBlockHalf      (kBlockEdge * kBlockEdgeHalf)
 #define kComputeBlockSize (kBlockSize * 3)
 
-// IntFloatPairÊÇÎªÁËÄ£Äâoutput_order input_orderµÄvector
+// IntFloatPairÂ Â«Å’â„¢Â¡Ã€Æ’Â£Æ’â€šoutput_order input_orderÂµÆ’vector
 typedef struct __IntFloatPair
 {
     int   idx;
@@ -734,21 +738,21 @@ __kernel void clAddBorderEx(__global float *out, const int xsize, const int ysiz
 
 }
 
-// batchÊÇÖ¸ÒÑ¾­¶þÎ¬¿éÕ¹¿ªÎªÁËÒ»Î¬¿é
+// batchÂ Â«Ã·âˆâ€œâ€”Ã¦â‰ âˆ‚Ë›Å’Â¨Ã¸Ãˆâ€™Ï€Ã¸â„¢Å’â„¢Â¡Ã€â€œÂªÅ’Â¨Ã¸Ãˆ
 __kernel void clComputeBlockZeroingOrderEx(
-    __global const coeff_t *orig_batch_0,       // Ô­Ê¼Í¼ÏñÏµÊý
-    __global const coeff_t *orig_batch_1,       // Ô­Ê¼Í¼ÏñÏµÊý
-    __global const coeff_t *orig_batch_2,       // Ô­Ê¼Í¼ÏñÏµÊý
-    __global const float   *orig_image_batch,   // Ô­Ê¼Í¼Ïñpregamma
-    __global const float   *mask_scale,         // Ô­Ê¼Í¼ÏñµÄÄ³¸öÉñÃØ²ÎÊý
+    __global const coeff_t *orig_batch_0,       // â€˜â‰ Â ÂºÃ•ÂºÅ“Ã’Å“ÂµÂ Ë
+    __global const coeff_t *orig_batch_1,       // â€˜â‰ Â ÂºÃ•ÂºÅ“Ã’Å“ÂµÂ Ë
+    __global const coeff_t *orig_batch_2,       // â€˜â‰ Â ÂºÃ•ÂºÅ“Ã’Å“ÂµÂ Ë
+    __global const float   *orig_image_batch,   // â€˜â‰ Â ÂºÃ•ÂºÅ“Ã’pregamma
+    __global const float   *mask_scale,         // â€˜â‰ Â ÂºÃ•ÂºÅ“Ã’ÂµÆ’Æ’â‰¥âˆË†â€¦Ã’âˆšÃ¿â‰¤Å’Â Ë
     const int              block_xsize,
     const int              block_ysize,
     const int              image_width,
     const int              image_height,
 
-    __global const coeff_t *mayout_batch_0,     // Êä³ö±¸Ñ¡Í¼µÄÏµÊý
-    __global const coeff_t *mayout_batch_1,     // Êä³ö±¸Ñ¡Í¼µÄÏµÊý
-    __global const coeff_t *mayout_batch_2,     // Êä³ö±¸Ñ¡Í¼µÄÏµÊý
+    __global const coeff_t *mayout_batch_0,     // Â â€°â‰¥Ë†Â±âˆâ€”Â°Ã•ÂºÂµÆ’Å“ÂµÂ Ë
+    __global const coeff_t *mayout_batch_1,     // Â â€°â‰¥Ë†Â±âˆâ€”Â°Ã•ÂºÂµÆ’Å“ÂµÂ Ë
+    __global const coeff_t *mayout_batch_2,     // Â â€°â‰¥Ë†Â±âˆâ€”Â°Ã•ÂºÂµÆ’Å“ÂµÂ Ë
     __global const ushort  *mayout_pixel_0,
     __global const ushort  *mayout_pixel_1,
     __global const ushort  *mayout_pixel_2,
@@ -756,8 +760,8 @@ __kernel void clComputeBlockZeroingOrderEx(
     const channel_info     mayout_channel_0,
     const channel_info     mayout_channel_1,
     const channel_info     mayout_channel_2,
-    const int factor,                                 // µ±Ç°²ÎÓëÔËËãµÄfactor
-    const int comp_mask,                              // µ±Ç°²ÎÓëÔËËãµÄchannel
+    const int factor,                                 // ÂµÂ±Â«âˆžâ‰¤Å’â€ÃŽâ€˜Ã€Ã€â€žÂµÆ’factor
+    const int comp_mask,                              // ÂµÂ±Â«âˆžâ‰¤Å’â€ÃŽâ€˜Ã€Ã€â€žÂµÆ’channel
     const float BlockErrorLimit,
     __global CoeffData *output_order_list/*out*/)
 {
@@ -779,7 +783,7 @@ __kernel void clComputeBlockZeroingOrderEx(
     mayout_channel[1].pixel = mayout_pixel_1;
     mayout_channel[2].pixel = mayout_pixel_2;
 
-    int block_idx = 0;        // ¸ù¾ÝÏÂÃæmaskÃüÖÐµÄchannelÀ´¼ÆËãindx
+    int block_idx = 0;        // âˆË˜Ã¦â€ºÅ“Â¬âˆšÃŠmaskâˆšÂ¸Ã·â€“ÂµÆ’channelÂ¿Â¥Âºâˆ†Ã€â€žindx
 
     coeff_t mayout_block[kComputeBlockSize] = { 0 };
     coeff_t orig_block[kComputeBlockSize]   = { 0 };
@@ -833,7 +837,7 @@ __kernel void clComputeBlockZeroingOrderEx(
         }
 
         if (best_err >= BlockErrorLimit)
-        {   // err¶ÓÁÐÊÇÖð½¥Ôö´óµÄ£¬Èç¹ûÕâÀïÒÑ¾­³¬¹ýErrorLimit£¬ºóÐøµÄ¼ÆËã¾ÍÊÇÈßÓàµÄÁË
+        {   // errâˆ‚â€Â¡â€“Â Â«Ã·ï£¿Î©â€¢â€˜Ë†Â¥Ã›ÂµÆ’Â£Â¨Â»ÃÏ€Ëšâ€™â€šÂ¿Ã”â€œâ€”Ã¦â‰ â‰¥Â¨Ï€ËErrorLimitÂ£Â¨âˆ«Ã›â€“Â¯ÂµÆ’Âºâˆ†Ã€â€žÃ¦Ã•Â Â«Â»ï¬‚â€â€¡ÂµÆ’Â¡Ã€
             break;
         }
         int idx = input_order.pData[best_i].idx;
@@ -843,7 +847,7 @@ __kernel void clComputeBlockZeroingOrderEx(
         list_push_back(&output_order, idx, best_err);
     }
 
-    // ×¢Òâoutput_orderÕâÀïµÄresize¾ÍÊÇ°ÑÎ²²¿µÄÖÃÎ»0
+    // â—ŠÂ¢â€œâ€šoutput_orderâ€™â€šÂ¿Ã”ÂµÆ’resizeÃ¦Ã•Â Â«âˆžâ€”Å’â‰¤â‰¤Ã¸ÂµÆ’Ã·âˆšÅ’Âª0
     float min_err = 1e10;
     for (int i = output_order.size - 1; i >= 0; --i) {
         min_err = min(min_err, output_order.pData[i].err);
@@ -855,7 +859,7 @@ __kernel void clComputeBlockZeroingOrderEx(
     int out_count = 0;
     for (int i = 0; i < kComputeBlockSize && i < output_order.size; i++)
     {
-        // ¹ýÂË½Ï´óµÄerr£¬Õâ²¿·Ö½øÈëºó¶Ë¼ÆËãÃ»ÓÐÒâÒå
+        // Ï€ËÂ¬Ã€Î©Å“Â¥Ã›ÂµÆ’errÂ£Â¨â€™â€šâ‰¤Ã¸âˆ‘Ã·Î©Â¯Â»ÃŽâˆ«Ã›âˆ‚Ã€Âºâˆ†Ã€â€žâˆšÂªâ€â€“â€œâ€šâ€œÃ‚
         if (output_order.pData[i].err <= BlockErrorLimit)
         {
             output_block[out_count].idx = output_order.pData[i].idx;
@@ -1357,7 +1361,7 @@ __constant double MakeHighFreqColorDiffDy_lut[21] = {
 	MakeHighFreqColorDiffDy_off + 6 * MakeHighFreqColorDiffDy_inc,
 	MakeHighFreqColorDiffDy_off + 7 * MakeHighFreqColorDiffDy_inc,
 	MakeHighFreqColorDiffDy_off + 8 * MakeHighFreqColorDiffDy_inc,
-	MakeHighFreqColorDiffDy_off + 9 * MakeHighFreqColorDiffDy_inc,
+	MakeHighFreqColorDiffDy_off + 9 * MakÂ§eHighFreqColorDiffDy_inc,
 	MakeHighFreqColorDiffDy_off + 10 * MakeHighFreqColorDiffDy_inc,
 	MakeHighFreqColorDiffDy_off + 11 * MakeHighFreqColorDiffDy_inc,
 	MakeHighFreqColorDiffDy_off + 12 * MakeHighFreqColorDiffDy_inc,
@@ -2928,10 +2932,10 @@ __device__ void Convolution(size_t xsize, size_t ysize,
 }
 
 // ian todo
-// ¼ÆËã½á¹ûÊä³öµ½output
+// Âºâˆ†Ã€â€žÎ©Â·Ï€ËšÂ â€°â‰¥Ë†ÂµÎ©output
 __device__ void BlurEx(const float *r, int xsize, int ysize, double kSigma, double border_ratio, float *output)
 {
-    // ²Î¿¼clBlurEx2µÄÊµÏÖ£¬sigma = 1.1£¬ÕâÊ±step¡¢diff¶¼½«ÌØ»¯Îª¹Ì¶¨Öµ
+    // â‰¤Å’Ã¸ÂºclBlurEx2ÂµÆ’Â ÂµÅ“Ã·Â£Â¨sigma = 1.1Â£Â¨â€™â€šÂ Â±stepÂ°Â¢diffâˆ‚ÂºÎ©Â´ÃƒÃ¿ÂªÃ˜Å’â„¢Ï€Ãƒâˆ‚Â®Ã·Âµ
 	const double sigma = 1.1;
 	double m = 2.25;  // Accuracy increases when m is increased.
 	const double scaler = -0.41322314049586772; // when sigma=1.1, scaler is -0.41322314049586772
@@ -3096,7 +3100,7 @@ __device__ double ComputeImage8x8Block(__private float rgb0_c[3][kDCTBlockSize],
                                 rgb1_c[0], rgb1_c[1], rgb1_c[2],
                                 8, 8);
 //    return 0;       // 544ms
-    // ÕâÀïÎªÉ¶Òª°Ñfloat×ª³Édouble²ÅÄÜ¼ÌÐø×ö¼ÆËã£¿
+    // â€™â€šÂ¿Ã”Å’â„¢â€¦âˆ‚â€œâ„¢âˆžâ€”floatâ—Šâ„¢â‰¥â€¦doubleâ‰¤â‰ˆÆ’â€¹ÂºÃƒâ€“Â¯â—ŠË†Âºâˆ†Ã€â€žÂ£Ã¸
     double b0[3 * kDCTBlockSize];       // 
     double b1[3 * kDCTBlockSize];
     for (int c = 0; c < 3; ++c) {
@@ -3428,4 +3432,6 @@ __device__ double CompareBlockFactor(const channel_info mayout_channel[3],
 
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
+#endif
+
 #endif

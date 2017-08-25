@@ -1,9 +1,11 @@
 #pragma once
+
+#ifdef __USE_CUDA__
+
 #include "guetzli/processor.h"
 #include "clguetzli.cl.h"
 #include "ocu.h"
 
-#ifdef __USE_CUDA__
 
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #define double float
