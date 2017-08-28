@@ -3428,6 +3428,9 @@ __kernel void clStartBlockComparisionsEx(
 #define lut kSrgb8ToLinearTable
     const int block_x = get_global_id(0);
     const int block_y = get_global_id(1);
+
+	if (block_x >= block_width || block_y >= block_height) return;
+
 	int block_ix = block_y * block_width + block_x;
 
 	__private float currentR[3 * 8 * 8];
