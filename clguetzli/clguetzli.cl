@@ -107,6 +107,8 @@ __kernel void clConvolutionEx(
     const int oxsize = get_global_size(0);
     const int ysize = get_global_size(1);
 
+	if (ox >= oxsize || y >= ysize) return;
+
     const int x = ox * xstep;
 
     float weight_no_border = 0;
@@ -633,6 +635,8 @@ __kernel void clDoMaskEx(
     const int x = get_global_id(0);
     const int y = get_global_id(1);
 
+	if (x >= xsize || y >= ysize) return;
+
 	const double w00 = 232.206464018;
 	const double w11 = 22.9455222245;
 	const double w22 = 503.962310606;
@@ -664,8 +668,12 @@ __kernel void clCombineChannelsEx(
     const int res_xsize,
     const int step)
 {
-    const int res_x = get_global_id(0) * step;
-    const int res_y = get_global_id(1) * step;
+    const int x = get_global_id(0);
+    const int y = get_global_id(1);
+
+	if (x >= xsize || y >= ysize) return;
+    const int res_x = x * step;
+    const int res_y = y * step;
 
     double mask[3];
     double dc_mask[3];
@@ -692,6 +700,9 @@ __kernel void clUpsampleSquareRootEx(__global float *diffmap_out, __global const
 
     const int res_xsize = get_global_size(0);
     const int res_ysize = get_global_size(1);
+
+	// not sure if here needs to check bounds
+	// if (res_x >= res_xsize || res_y >= res_ysize) return;
 
     const int pos_x = res_x * step;
     const int pos_y = res_y * step;
