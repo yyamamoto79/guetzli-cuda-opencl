@@ -1,83 +1,17 @@
 //
 //  ometal.h
-//  guetzli_ios_metal
+//  guetzli_ios
 //
-//  Created by 张聪 on 2017/8/15.
-//  Copyright © 2017年 张聪. All rights reserved.
+//  Created by 张聪 on 2017/9/13.
+//  Copyright © 2017年 com.tencent. All rights reserved.
 //
 
-//#include "ocl.h"
-
-#import <Foundation/Foundation.h>
-#import <Metal/MTLDefines.h>
-#import <Metal/MTLBlitCommandEncoder.h>
-#import <Metal/MTLBuffer.h>
-#import <Metal/MTLCommandBuffer.h>
-#import <Metal/MTLComputeCommandEncoder.h>
-#import <Metal/MTLCommandQueue.h>
-#import <Metal/MTLDevice.h>
-#import <Metal/MTLDepthStencil.h>
-#import <Metal/MTLDrawable.h>
-#import <Metal/MTLRenderPass.h>
-#import <Metal/MTLComputePipeline.h>
-#import <Metal/MTLLibrary.h>
-#import <Metal/MTLPixelFormat.h>
-#import <Metal/MTLRenderPipeline.h>
-#import <Metal/MTLVertexDescriptor.h>
-#import <Metal/MTLParallelRenderCommandEncoder.h>
-#import <Metal/MTLRenderCommandEncoder.h>
-#import <Metal/MTLSampler.h>
-#import <Metal/MTLTexture.h>
-#import <Metal/MTLHeap.h>
+#ifdef __USE_METAL__
+#import "clguetzli.cl.h"
 
 
-#ifndef __SIMD_HEADER__
-#define __SIMD_HEADER__
-
-#include <simd/vector.h>
-#include <simd/matrix.h>
-
-#endif
-
-@class metalguezli;
-
-#define cl_mem id<MTLBuffer>
-
-typedef union ocl_channels_t
-{
-    struct
-    {
-         cl_mem r =NULL;
-         cl_mem g=NULL;
-         cl_mem b=NULL;
-    };
-    struct
-    {
-        cl_mem x;
-        cl_mem y;
-        cl_mem b_;
-    };
-
-    struct
-    {
-        cl_mem ch[3];
-    };
-    
-    ocl_channels_t() { };
-
-}ocl_channels;
-
-typedef short coeff_t;
 
 
-typedef struct __channel_info_t
-{
-    int factor;
-    int block_width;
-    int block_height;
-    const coeff_t *coeff;
-    const ushort  *pixel;
-}channel_info;
 
 enum KernelName {
     KERNEL_CONVOLUTION = 0,
@@ -105,13 +39,11 @@ enum KernelName {
 #define LOG_CL_RESULT(e)   if (CL_SUCCESS != (e)) { LogError("Error: %s:%d returned %s.\n", __FUNCTION__, __LINE__, TranslateOpenCLError((e)));}
 
 
-cl_mem allocMem(size_t s, const void *init);
+metal_mem allocMem(size_t s, const void *init);
 
 
-ocl_channels* allocMemChannels(size_t s, const void *c0, const void *c1, const void *c2);
+ometal_channels* allocMemChannels(size_t s, const void *c0, const void *c1, const void *c2);
 
-
-void releaseMemChannels(ocl_channels &rgb);
 
 
 
@@ -130,3 +62,7 @@ void releaseMemChannels(ocl_channels &rgb);
 
 
 @end
+
+#endif
+
+

@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		F60803771F4A761F00A93FBE /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = F60803761F4A761F00A93FBE /* 1.png */; };
 		F60803791F4A762900A93FBE /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = F60803781F4A762900A93FBE /* 1.png */; };
+		F61A313E1F6BB232005C8F1E /* clguetzli.cl in Sources */ = {isa = PBXBuildFile; fileRef = F61A313D1F6BB232005C8F1E /* clguetzli.cl */; };
+		F61A31401F6BB314005C8F1E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F61A313F1F6BB314005C8F1E /* UIKit.framework */; };
+		F61A31421F6BB31A005C8F1E /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F61A31411F6BB31A005C8F1E /* Metal.framework */; };
 		F63815631F3C189F00573FA2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F63815621F3C189F00573FA2 /* main.m */; };
 		F63815661F3C189F00573FA2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F63815651F3C189F00573FA2 /* AppDelegate.m */; };
 		F638156C1F3C189F00573FA2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F638156A1F3C189F00573FA2 /* Main.storyboard */; };
@@ -16,28 +19,25 @@
 		F63815711F3C189F00573FA2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F638156F1F3C189F00573FA2 /* LaunchScreen.storyboard */; };
 		F638164B1F3C18E500573FA2 /* appveyor.yml in Resources */ = {isa = PBXBuildFile; fileRef = F63815781F3C18E500573FA2 /* appveyor.yml */; };
 		F638164C1F3C18E500573FA2 /* BUILD in Resources */ = {isa = PBXBuildFile; fileRef = F63815791F3C18E500573FA2 /* BUILD */; };
-		F638164D1F3C18E600573FA2 /* clbutter_comparator.mm in Sources */ = {isa = PBXBuildFile; fileRef = F638157C1F3C18E500573FA2 /* clbutter_comparator.mm */; };
-		F638164F1F3C18E600573FA2 /* clguetzli.cl.mm in Sources */ = {isa = PBXBuildFile; fileRef = F638157F1F3C18E500573FA2 /* clguetzli.cl.mm */; };
-		F63816501F3C18E600573FA2 /* clguetzli.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63815811F3C18E500573FA2 /* clguetzli.mm */; };
+		F638164D1F3C18E600573FA2 /* clbutter_comparator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F638157C1F3C18E500573FA2 /* clbutter_comparator.cpp */; };
+		F638164F1F3C18E600573FA2 /* clguetzli.cl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F638157F1F3C18E500573FA2 /* clguetzli.cl.cpp */; };
+		F63816501F3C18E600573FA2 /* clguetzli.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F63815811F3C18E500573FA2 /* clguetzli.cpp */; };
 		F63816521F3C18E600573FA2 /* clguetzli_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F63815841F3C18E500573FA2 /* clguetzli_test.cpp */; };
-		F63816531F3C18E600573FA2 /* cuguetzli.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F63815861F3C18E500573FA2 /* cuguetzli.cpp */; };
-		F63816541F3C18E600573FA2 /* cumem_pool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F63815881F3C18E500573FA2 /* cumem_pool.cpp */; };
 		F63816571F3C18E600573FA2 /* ocl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F638158D1F3C18E500573FA2 /* ocl.cpp */; };
-		F63816581F3C18E600573FA2 /* ocu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F638158F1F3C18E500573FA2 /* ocu.cpp */; };
 		F63816591F3C18E600573FA2 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F63815911F3C18E500573FA2 /* utils.cpp */; };
 		F638165A1F3C18E600573FA2 /* compile.bat in Resources */ = {isa = PBXBuildFile; fileRef = F63815931F3C18E500573FA2 /* compile.bat */; };
 		F638165B1F3C18E600573FA2 /* compile.sh in Resources */ = {isa = PBXBuildFile; fileRef = F63815941F3C18E500573FA2 /* compile.sh */; };
 		F638165C1F3C18E600573FA2 /* CONTRIBUTING.md in Sources */ = {isa = PBXBuildFile; fileRef = F63815951F3C18E500573FA2 /* CONTRIBUTING.md */; };
 		F638165D1F3C18E600573FA2 /* fuzz_target.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815961F3C18E500573FA2 /* fuzz_target.cc */; };
-		F638165E1F3C18E600573FA2 /* butteraugli_comparator.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63815981F3C18E500573FA2 /* butteraugli_comparator.mm */; };
+		F638165E1F3C18E600573FA2 /* butteraugli_comparator.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815981F3C18E500573FA2 /* butteraugli_comparator.cc */; };
 		F638165F1F3C18E600573FA2 /* dct_double.cc in Sources */ = {isa = PBXBuildFile; fileRef = F638159C1F3C18E500573FA2 /* dct_double.cc */; };
 		F63816601F3C18E600573FA2 /* debug_print.cc in Sources */ = {isa = PBXBuildFile; fileRef = F638159E1F3C18E500573FA2 /* debug_print.cc */; };
 		F63816611F3C18E600573FA2 /* entropy_encode.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815A01F3C18E500573FA2 /* entropy_encode.cc */; };
 		F63816621F3C18E600573FA2 /* fdct.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815A31F3C18E500573FA2 /* fdct.cc */; };
 		F63816631F3C18E600573FA2 /* gamma_correct.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815A51F3C18E500573FA2 /* gamma_correct.cc */; };
-		F63816641F3C18E600573FA2 /* guetzli.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63815A71F3C18E500573FA2 /* guetzli.mm */; };
+		F63816641F3C18E600573FA2 /* guetzli.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815A71F3C18E500573FA2 /* guetzli.cc */; };
 		F63816651F3C18E600573FA2 /* idct.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815A91F3C18E500573FA2 /* idct.cc */; };
-		F63816661F3C18E600573FA2 /* jpeg_data.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63815AC1F3C18E500573FA2 /* jpeg_data.mm */; };
+		F63816661F3C18E600573FA2 /* jpeg_data.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815AC1F3C18E500573FA2 /* jpeg_data.cc */; };
 		F63816671F3C18E600573FA2 /* jpeg_data_decoder.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815AE1F3C18E500573FA2 /* jpeg_data_decoder.cc */; };
 		F63816681F3C18E600573FA2 /* jpeg_data_encoder.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815B01F3C18E500573FA2 /* jpeg_data_encoder.cc */; };
 		F63816691F3C18E600573FA2 /* jpeg_data_reader.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815B21F3C18E500573FA2 /* jpeg_data_reader.cc */; };
@@ -46,7 +46,7 @@
 		F638166C1F3C18E600573FA2 /* order.inc in Sources */ = {isa = PBXBuildFile; fileRef = F63815B91F3C18E500573FA2 /* order.inc */; };
 		F638166D1F3C18E600573FA2 /* output_image.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815BA1F3C18E500573FA2 /* output_image.cc */; };
 		F638166E1F3C18E600573FA2 /* preprocess_downsample.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815BC1F3C18E500573FA2 /* preprocess_downsample.cc */; };
-		F638166F1F3C18E600573FA2 /* processor.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63815BE1F3C18E500573FA2 /* processor.mm */; };
+		F638166F1F3C18E600573FA2 /* processor.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815BE1F3C18E500573FA2 /* processor.cc */; };
 		F63816701F3C18E600573FA2 /* quality.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815C01F3C18E500573FA2 /* quality.cc */; };
 		F63816711F3C18E600573FA2 /* quantize.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815C21F3C18E500573FA2 /* quantize.cc */; };
 		F63816721F3C18E600573FA2 /* score.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63815C41F3C18E500573FA2 /* score.cc */; };
@@ -106,8 +106,8 @@
 		F63816A81F3C18E600573FA2 /* testSingle.sh in Resources */ = {isa = PBXBuildFile; fileRef = F63816021F3C18E500573FA2 /* testSingle.sh */; };
 		F63816A91F3C18E600573FA2 /* testSingle.bat in Resources */ = {isa = PBXBuildFile; fileRef = F63816031F3C18E500573FA2 /* testSingle.bat */; };
 		F63816AA1F3C18E600573FA2 /* timg.jpg in Resources */ = {isa = PBXBuildFile; fileRef = F63816041F3C18E500573FA2 /* timg.jpg */; };
-		F63816AC1F3C18E600573FA2 /* butteraugli.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63816091F3C18E500573FA2 /* butteraugli.mm */; };
-		F63816AD1F3C18E600573FA2 /* butteraugli_main.mm in Sources */ = {isa = PBXBuildFile; fileRef = F638160B1F3C18E500573FA2 /* butteraugli_main.mm */; };
+		F63816AC1F3C18E600573FA2 /* butteraugli.cc in Sources */ = {isa = PBXBuildFile; fileRef = F63816091F3C18E500573FA2 /* butteraugli.cc */; };
+		F63816AD1F3C18E600573FA2 /* butteraugli_main.cc in Sources */ = {isa = PBXBuildFile; fileRef = F638160B1F3C18E500573FA2 /* butteraugli_main.cc */; };
 		F63816AE1F3C18E600573FA2 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = F638160C1F3C18E500573FA2 /* Makefile */; };
 		F63816D81F3C18E600573FA2 /* guetzli-compare.py in Resources */ = {isa = PBXBuildFile; fileRef = F63816471F3C18E500573FA2 /* guetzli-compare.py */; };
 		F63816D91F3C18E600573FA2 /* vcvars64.bat in Resources */ = {isa = PBXBuildFile; fileRef = F63816481F3C18E500573FA2 /* vcvars64.bat */; };
@@ -142,12 +142,15 @@
 		F638177A1F3C48D800573FA2 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63817791F3C48D800573FA2 /* ViewController.mm */; };
 		F63817811F41695B00573FA2 /* metalguetzli.metal in Sources */ = {isa = PBXBuildFile; fileRef = F63817801F41695B00573FA2 /* metalguetzli.metal */; };
 		F63817871F4292D500573FA2 /* ometal.mm in Sources */ = {isa = PBXBuildFile; fileRef = F63817861F4292D500573FA2 /* ometal.mm */; };
-		F638178B1F42F2FF00573FA2 /* metalguezli.mm in Sources */ = {isa = PBXBuildFile; fileRef = F638178A1F42F2FF00573FA2 /* metalguezli.mm */; };
+		F638178B1F42F2FF00573FA2 /* metalguetzli.mm in Sources */ = {isa = PBXBuildFile; fileRef = F638178A1F42F2FF00573FA2 /* metalguetzli.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F60803761F4A761F00A93FBE /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
 		F60803781F4A762900A93FBE /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
+		F61A313D1F6BB232005C8F1E /* clguetzli.cl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = clguetzli.cl; path = ../clguetzli/clguetzli.cl; sourceTree = "<group>"; };
+		F61A313F1F6BB314005C8F1E /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		F61A31411F6BB31A005C8F1E /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		F638155E1F3C189F00573FA2 /* guetzli_ios_metal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = guetzli_ios_metal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63815621F3C189F00573FA2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F63815641F3C189F00573FA2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -160,29 +163,23 @@
 		F63815781F3C18E500573FA2 /* appveyor.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = appveyor.yml; path = ../appveyor.yml; sourceTree = "<group>"; };
 		F63815791F3C18E500573FA2 /* BUILD */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = BUILD; path = ../BUILD; sourceTree = "<group>"; };
 		F638157B1F3C18E500573FA2 /* cl.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cl.hpp; sourceTree = "<group>"; };
-		F638157C1F3C18E500573FA2 /* clbutter_comparator.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = clbutter_comparator.mm; sourceTree = "<group>"; };
+		F638157C1F3C18E500573FA2 /* clbutter_comparator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clbutter_comparator.cpp; sourceTree = "<group>"; };
 		F638157D1F3C18E500573FA2 /* clbutter_comparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clbutter_comparator.h; sourceTree = "<group>"; };
-		F638157F1F3C18E500573FA2 /* clguetzli.cl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = clguetzli.cl.mm; sourceTree = "<group>"; };
+		F638157F1F3C18E500573FA2 /* clguetzli.cl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clguetzli.cl.cpp; sourceTree = "<group>"; };
 		F63815801F3C18E500573FA2 /* clguetzli.cl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clguetzli.cl.h; sourceTree = "<group>"; };
-		F63815811F3C18E500573FA2 /* clguetzli.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = clguetzli.mm; sourceTree = "<group>"; };
+		F63815811F3C18E500573FA2 /* clguetzli.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clguetzli.cpp; sourceTree = "<group>"; };
 		F63815831F3C18E500573FA2 /* clguetzli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clguetzli.h; sourceTree = "<group>"; };
 		F63815841F3C18E500573FA2 /* clguetzli_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clguetzli_test.cpp; sourceTree = "<group>"; };
 		F63815851F3C18E500573FA2 /* clguetzli_test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clguetzli_test.h; sourceTree = "<group>"; };
-		F63815861F3C18E500573FA2 /* cuguetzli.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cuguetzli.cpp; sourceTree = "<group>"; };
-		F63815871F3C18E500573FA2 /* cuguetzli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cuguetzli.h; sourceTree = "<group>"; };
-		F63815881F3C18E500573FA2 /* cumem_pool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cumem_pool.cpp; sourceTree = "<group>"; };
-		F63815891F3C18E500573FA2 /* cumem_pool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cumem_pool.h; sourceTree = "<group>"; };
 		F638158D1F3C18E500573FA2 /* ocl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ocl.cpp; sourceTree = "<group>"; };
 		F638158E1F3C18E500573FA2 /* ocl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ocl.h; sourceTree = "<group>"; };
-		F638158F1F3C18E500573FA2 /* ocu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ocu.cpp; sourceTree = "<group>"; };
-		F63815901F3C18E500573FA2 /* ocu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ocu.h; sourceTree = "<group>"; };
 		F63815911F3C18E500573FA2 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
 		F63815921F3C18E500573FA2 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		F63815931F3C18E500573FA2 /* compile.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = compile.bat; path = ../compile.bat; sourceTree = "<group>"; };
 		F63815941F3C18E500573FA2 /* compile.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = compile.sh; path = ../compile.sh; sourceTree = "<group>"; };
 		F63815951F3C18E500573FA2 /* CONTRIBUTING.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = CONTRIBUTING.md; path = ../CONTRIBUTING.md; sourceTree = "<group>"; };
 		F63815961F3C18E500573FA2 /* fuzz_target.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fuzz_target.cc; path = ../fuzz_target.cc; sourceTree = "<group>"; };
-		F63815981F3C18E500573FA2 /* butteraugli_comparator.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = butteraugli_comparator.mm; sourceTree = "<group>"; };
+		F63815981F3C18E500573FA2 /* butteraugli_comparator.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = butteraugli_comparator.cc; sourceTree = "<group>"; };
 		F63815991F3C18E500573FA2 /* butteraugli_comparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = butteraugli_comparator.h; sourceTree = "<group>"; };
 		F638159A1F3C18E500573FA2 /* color_transform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = color_transform.h; sourceTree = "<group>"; };
 		F638159B1F3C18E500573FA2 /* comparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = comparator.h; sourceTree = "<group>"; };
@@ -197,12 +194,12 @@
 		F63815A41F3C18E500573FA2 /* fdct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdct.h; sourceTree = "<group>"; };
 		F63815A51F3C18E500573FA2 /* gamma_correct.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gamma_correct.cc; sourceTree = "<group>"; };
 		F63815A61F3C18E500573FA2 /* gamma_correct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gamma_correct.h; sourceTree = "<group>"; };
-		F63815A71F3C18E500573FA2 /* guetzli.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = guetzli.mm; sourceTree = "<group>"; };
+		F63815A71F3C18E500573FA2 /* guetzli.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = guetzli.cc; sourceTree = "<group>"; };
 		F63815A81F3C18E500573FA2 /* guetzli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = guetzli.h; sourceTree = "<group>"; };
 		F63815A91F3C18E500573FA2 /* idct.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = idct.cc; sourceTree = "<group>"; };
 		F63815AA1F3C18E500573FA2 /* idct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = idct.h; sourceTree = "<group>"; };
 		F63815AB1F3C18E500573FA2 /* jpeg_bit_writer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jpeg_bit_writer.h; sourceTree = "<group>"; };
-		F63815AC1F3C18E500573FA2 /* jpeg_data.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = jpeg_data.mm; sourceTree = "<group>"; };
+		F63815AC1F3C18E500573FA2 /* jpeg_data.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jpeg_data.cc; sourceTree = "<group>"; };
 		F63815AD1F3C18E500573FA2 /* jpeg_data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jpeg_data.h; sourceTree = "<group>"; };
 		F63815AE1F3C18E500573FA2 /* jpeg_data_decoder.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jpeg_data_decoder.cc; sourceTree = "<group>"; };
 		F63815AF1F3C18E500573FA2 /* jpeg_data_decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jpeg_data_decoder.h; sourceTree = "<group>"; };
@@ -220,7 +217,7 @@
 		F63815BB1F3C18E500573FA2 /* output_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = output_image.h; sourceTree = "<group>"; };
 		F63815BC1F3C18E500573FA2 /* preprocess_downsample.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = preprocess_downsample.cc; sourceTree = "<group>"; };
 		F63815BD1F3C18E500573FA2 /* preprocess_downsample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = preprocess_downsample.h; sourceTree = "<group>"; };
-		F63815BE1F3C18E500573FA2 /* processor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = processor.mm; sourceTree = "<group>"; };
+		F63815BE1F3C18E500573FA2 /* processor.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = processor.cc; sourceTree = "<group>"; };
 		F63815BF1F3C18E500573FA2 /* processor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = processor.h; sourceTree = "<group>"; };
 		F63815C01F3C18E500573FA2 /* quality.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = quality.cc; sourceTree = "<group>"; };
 		F63815C11F3C18E500573FA2 /* quality.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quality.h; sourceTree = "<group>"; };
@@ -285,9 +282,9 @@
 		F63816021F3C18E500573FA2 /* testSingle.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = testSingle.sh; sourceTree = "<group>"; };
 		F63816031F3C18E500573FA2 /* testSingle.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = testSingle.bat; sourceTree = "<group>"; };
 		F63816041F3C18E500573FA2 /* timg.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = timg.jpg; sourceTree = "<group>"; };
-		F63816091F3C18E500573FA2 /* butteraugli.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = butteraugli.mm; sourceTree = "<group>"; };
+		F63816091F3C18E500573FA2 /* butteraugli.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = butteraugli.cc; sourceTree = "<group>"; };
 		F638160A1F3C18E500573FA2 /* butteraugli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = butteraugli.h; sourceTree = "<group>"; };
-		F638160B1F3C18E500573FA2 /* butteraugli_main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = butteraugli_main.mm; sourceTree = "<group>"; };
+		F638160B1F3C18E500573FA2 /* butteraugli_main.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = butteraugli_main.cc; sourceTree = "<group>"; };
 		F638160C1F3C18E500573FA2 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		F63816471F3C18E500573FA2 /* guetzli-compare.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = "guetzli-compare.py"; sourceTree = "<group>"; };
 		F63816481F3C18E500573FA2 /* vcvars64.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = vcvars64.bat; path = ../vcvars64.bat; sourceTree = "<group>"; };
@@ -326,8 +323,8 @@
 		F63817801F41695B00573FA2 /* metalguetzli.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = metalguetzli.metal; sourceTree = "<group>"; };
 		F63817851F4292D500573FA2 /* ometal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ometal.h; sourceTree = "<group>"; };
 		F63817861F4292D500573FA2 /* ometal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ometal.mm; sourceTree = "<group>"; };
-		F63817891F42F2FF00573FA2 /* metalguezli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metalguezli.h; sourceTree = "<group>"; };
-		F638178A1F42F2FF00573FA2 /* metalguezli.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metalguezli.mm; sourceTree = "<group>"; };
+		F63817891F42F2FF00573FA2 /* metalguetzli.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metalguetzli.h; sourceTree = "<group>"; };
+		F638178A1F42F2FF00573FA2 /* metalguetzli.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metalguetzli.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -335,6 +332,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F61A31421F6BB31A005C8F1E /* Metal.framework in Frameworks */,
+				F61A31401F6BB314005C8F1E /* UIKit.framework in Frameworks */,
 				F63817781F3C470600573FA2 /* libz.tbd in Frameworks */,
 				F63817761F3C46D900573FA2 /* libz.1.tbd in Frameworks */,
 				F638176C1F3C367B00573FA2 /* libjpeg.a in Frameworks */,
@@ -347,6 +346,7 @@
 		F63815551F3C189E00573FA2 = {
 			isa = PBXGroup;
 			children = (
+				F61A313D1F6BB232005C8F1E /* clguetzli.cl */,
 				F63815781F3C18E500573FA2 /* appveyor.yml */,
 				F63815791F3C18E500573FA2 /* BUILD */,
 				F638157A1F3C18E500573FA2 /* clguetzli */,
@@ -418,29 +418,23 @@
 			isa = PBXGroup;
 			children = (
 				F638157B1F3C18E500573FA2 /* cl.hpp */,
-				F638157C1F3C18E500573FA2 /* clbutter_comparator.mm */,
+				F638157C1F3C18E500573FA2 /* clbutter_comparator.cpp */,
 				F638157D1F3C18E500573FA2 /* clbutter_comparator.h */,
-				F638157F1F3C18E500573FA2 /* clguetzli.cl.mm */,
+				F638157F1F3C18E500573FA2 /* clguetzli.cl.cpp */,
 				F63815801F3C18E500573FA2 /* clguetzli.cl.h */,
-				F63815811F3C18E500573FA2 /* clguetzli.mm */,
+				F63815811F3C18E500573FA2 /* clguetzli.cpp */,
 				F63815831F3C18E500573FA2 /* clguetzli.h */,
 				F63815841F3C18E500573FA2 /* clguetzli_test.cpp */,
 				F63815851F3C18E500573FA2 /* clguetzli_test.h */,
-				F63815861F3C18E500573FA2 /* cuguetzli.cpp */,
-				F63815871F3C18E500573FA2 /* cuguetzli.h */,
-				F63815881F3C18E500573FA2 /* cumem_pool.cpp */,
-				F63815891F3C18E500573FA2 /* cumem_pool.h */,
 				F638158D1F3C18E500573FA2 /* ocl.cpp */,
 				F638158E1F3C18E500573FA2 /* ocl.h */,
-				F638158F1F3C18E500573FA2 /* ocu.cpp */,
-				F63815901F3C18E500573FA2 /* ocu.h */,
 				F63815911F3C18E500573FA2 /* utils.cpp */,
 				F63815921F3C18E500573FA2 /* utils.h */,
 				F63817801F41695B00573FA2 /* metalguetzli.metal */,
 				F63817851F4292D500573FA2 /* ometal.h */,
 				F63817861F4292D500573FA2 /* ometal.mm */,
-				F63817891F42F2FF00573FA2 /* metalguezli.h */,
-				F638178A1F42F2FF00573FA2 /* metalguezli.mm */,
+				F63817891F42F2FF00573FA2 /* metalguetzli.h */,
+				F638178A1F42F2FF00573FA2 /* metalguetzli.mm */,
 			);
 			name = clguetzli;
 			path = ../clguetzli;
@@ -449,7 +443,7 @@
 		F63815971F3C18E500573FA2 /* guetzli */ = {
 			isa = PBXGroup;
 			children = (
-				F63815981F3C18E500573FA2 /* butteraugli_comparator.mm */,
+				F63815981F3C18E500573FA2 /* butteraugli_comparator.cc */,
 				F63815991F3C18E500573FA2 /* butteraugli_comparator.h */,
 				F638159A1F3C18E500573FA2 /* color_transform.h */,
 				F638159B1F3C18E500573FA2 /* comparator.h */,
@@ -464,12 +458,12 @@
 				F63815A41F3C18E500573FA2 /* fdct.h */,
 				F63815A51F3C18E500573FA2 /* gamma_correct.cc */,
 				F63815A61F3C18E500573FA2 /* gamma_correct.h */,
-				F63815A71F3C18E500573FA2 /* guetzli.mm */,
+				F63815A71F3C18E500573FA2 /* guetzli.cc */,
 				F63815A81F3C18E500573FA2 /* guetzli.h */,
 				F63815A91F3C18E500573FA2 /* idct.cc */,
 				F63815AA1F3C18E500573FA2 /* idct.h */,
 				F63815AB1F3C18E500573FA2 /* jpeg_bit_writer.h */,
-				F63815AC1F3C18E500573FA2 /* jpeg_data.mm */,
+				F63815AC1F3C18E500573FA2 /* jpeg_data.cc */,
 				F63815AD1F3C18E500573FA2 /* jpeg_data.h */,
 				F63815AE1F3C18E500573FA2 /* jpeg_data_decoder.cc */,
 				F63815AF1F3C18E500573FA2 /* jpeg_data_decoder.h */,
@@ -487,7 +481,7 @@
 				F63815BB1F3C18E500573FA2 /* output_image.h */,
 				F63815BC1F3C18E500573FA2 /* preprocess_downsample.cc */,
 				F63815BD1F3C18E500573FA2 /* preprocess_downsample.h */,
-				F63815BE1F3C18E500573FA2 /* processor.mm */,
+				F63815BE1F3C18E500573FA2 /* processor.cc */,
 				F63815BF1F3C18E500573FA2 /* processor.h */,
 				F63815C01F3C18E500573FA2 /* quality.cc */,
 				F63815C11F3C18E500573FA2 /* quality.h */,
@@ -621,9 +615,9 @@
 		F63816081F3C18E500573FA2 /* butteraugli */ = {
 			isa = PBXGroup;
 			children = (
-				F63816091F3C18E500573FA2 /* butteraugli.mm */,
+				F63816091F3C18E500573FA2 /* butteraugli.cc */,
 				F638160A1F3C18E500573FA2 /* butteraugli.h */,
-				F638160B1F3C18E500573FA2 /* butteraugli_main.mm */,
+				F638160B1F3C18E500573FA2 /* butteraugli_main.cc */,
 				F638160C1F3C18E500573FA2 /* Makefile */,
 			);
 			path = butteraugli;
@@ -667,6 +661,8 @@
 		F63817691F3C367B00573FA2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F61A31411F6BB31A005C8F1E /* Metal.framework */,
+				F61A313F1F6BB314005C8F1E /* UIKit.framework */,
 				F63817771F3C470600573FA2 /* libz.tbd */,
 				F63817751F3C46D900573FA2 /* libz.1.tbd */,
 				F638176A1F3C367B00573FA2 /* libjpeg.a */,
@@ -817,11 +813,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F63816531F3C18E600573FA2 /* cuguetzli.cpp in Sources */,
 				F638165D1F3C18E600573FA2 /* fuzz_target.cc in Sources */,
 				F63816671F3C18E600573FA2 /* jpeg_data_decoder.cc in Sources */,
 				F638175E1F3C33E000573FA2 /* pngread.c in Sources */,
-				F63816641F3C18E600573FA2 /* guetzli.mm in Sources */,
+				F63816641F3C18E600573FA2 /* guetzli.cc in Sources */,
 				F638166B1F3C18E600573FA2 /* jpeg_huffman_decode.cc in Sources */,
 				F63817811F41695B00573FA2 /* metalguetzli.metal in Sources */,
 				F63816621F3C18E600573FA2 /* fdct.cc in Sources */,
@@ -829,17 +824,17 @@
 				F638175F1F3C33E000573FA2 /* pngrio.c in Sources */,
 				F63816721F3C18E600573FA2 /* score.cc in Sources */,
 				F63816AE1F3C18E600573FA2 /* Makefile in Sources */,
-				F63816581F3C18E600573FA2 /* ocu.cpp in Sources */,
 				F63816571F3C18E600573FA2 /* ocl.cpp in Sources */,
-				F63816661F3C18E600573FA2 /* jpeg_data.mm in Sources */,
+				F63816661F3C18E600573FA2 /* jpeg_data.cc in Sources */,
 				F63816651F3C18E600573FA2 /* idct.cc in Sources */,
+				F61A313E1F6BB232005C8F1E /* clguetzli.cl in Sources */,
 				F63816631F3C18E600573FA2 /* gamma_correct.cc in Sources */,
 				F638166D1F3C18E600573FA2 /* output_image.cc in Sources */,
 				F638166C1F3C18E600573FA2 /* order.inc in Sources */,
 				F63817611F3C33E000573FA2 /* pngrutil.c in Sources */,
 				F638175D1F3C33E000573FA2 /* pngpread.c in Sources */,
 				F63817631F3C33E000573FA2 /* pngtrans.c in Sources */,
-				F638164D1F3C18E600573FA2 /* clbutter_comparator.mm in Sources */,
+				F638164D1F3C18E600573FA2 /* clbutter_comparator.cpp in Sources */,
 				F63817651F3C33E000573FA2 /* pngwio.c in Sources */,
 				F63817671F3C33E000573FA2 /* pngwtran.c in Sources */,
 				F638165C1F3C18E600573FA2 /* CONTRIBUTING.md in Sources */,
@@ -856,12 +851,12 @@
 				F63816601F3C18E600573FA2 /* debug_print.cc in Sources */,
 				F63817871F4292D500573FA2 /* ometal.mm in Sources */,
 				F63817621F3C33E000573FA2 /* pngset.c in Sources */,
-				F638164F1F3C18E600573FA2 /* clguetzli.cl.mm in Sources */,
-				F63816AC1F3C18E600573FA2 /* butteraugli.mm in Sources */,
-				F638178B1F42F2FF00573FA2 /* metalguezli.mm in Sources */,
+				F638164F1F3C18E600573FA2 /* clguetzli.cl.cpp in Sources */,
+				F63816AC1F3C18E600573FA2 /* butteraugli.cc in Sources */,
+				F638178B1F42F2FF00573FA2 /* metalguetzli.mm in Sources */,
 				F638166A1F3C18E600573FA2 /* jpeg_data_writer.cc in Sources */,
-				F638166F1F3C18E600573FA2 /* processor.mm in Sources */,
-				F63816501F3C18E600573FA2 /* clguetzli.mm in Sources */,
+				F638166F1F3C18E600573FA2 /* processor.cc in Sources */,
+				F63816501F3C18E600573FA2 /* clguetzli.cpp in Sources */,
 				F63816F51F3C24C400573FA2 /* README.md in Sources */,
 				F63816701F3C18E600573FA2 /* quality.cc in Sources */,
 				F638165F1F3C18E600573FA2 /* dct_double.cc in Sources */,
@@ -873,9 +868,8 @@
 				F63815631F3C189F00573FA2 /* main.m in Sources */,
 				F638167C1F3C18E600573FA2 /* Makefile in Sources */,
 				F63817601F3C33E000573FA2 /* pngrtran.c in Sources */,
-				F63816AD1F3C18E600573FA2 /* butteraugli_main.mm in Sources */,
-				F638165E1F3C18E600573FA2 /* butteraugli_comparator.mm in Sources */,
-				F63816541F3C18E600573FA2 /* cumem_pool.cpp in Sources */,
+				F63816AD1F3C18E600573FA2 /* butteraugli_main.cc in Sources */,
+				F638165E1F3C18E600573FA2 /* butteraugli_comparator.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1004,6 +998,7 @@
 					"$(PROJECT_DIR)/privateframework",
 					"$(PROJECT_DIR)/frameworks",
 				);
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
 				GCC_LINK_WITH_DYNAMIC_LIBRARIES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
@@ -1042,6 +1037,7 @@
 					"$(PROJECT_DIR)/privateframework",
 					"$(PROJECT_DIR)/frameworks",
 				);
+				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
 				GCC_LINK_WITH_DYNAMIC_LIBRARIES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";

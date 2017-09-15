@@ -1,111 +1,117 @@
 //
-//  metalguezli.m
-//  guetzli_ios_metal
+//  metalguetzli.cpp
+//  guetzli_ios
 //
-//  Created by 张聪 on 2017/8/15.
-//  Copyright © 2017年 张聪. All rights reserved.
+//  Created by 张聪 on 2017/9/13.
+//  Copyright © 2017年 com.tencent. All rights reserved.
 //
+#ifdef __USE_METAL__
 
-#import "metalguezli.h"
+#import "metalguetzli.h"
 #import "ometal.h"
+#import "clguetzli_test.h"
+#import "clguetzli.cl.h"
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #define double float
 #endif
 
-#define cuFinish cuStreamSynchronize
+
 #define BLOCK_SIZE_X 16
 #define BLOCK_SIZE_Y 16
 #define BLOCK_COUNT_X(size)    ((size + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X)
 #define BLOCK_COUNT_Y(size)    ((size + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y)
+#define METAL_ERROR(e)  metalError((e), __FUNCTION__, __LINE__ )
 
-
-void clEnqueueReadBuffer(id     /* command_queue */,
-                         cl_mem m_cl_mem             /* buffer */,
-                         bool             /* blocking_read */,
-                         size_t              /* offset */,
-                         size_t    size          /* size */,
-                         void *   m_ptr           /* ptr */,
-                         uint             /* num_events_in_wait_list */,
-                         void *    /* event_wait_list */,
-                         void *          /* event */)
+void metalError(NSError *errors,const char* szFunc, int line)
 {
-    
-    NSData* data = [NSData dataWithBytesNoCopy:[m_cl_mem contents ] length: [m_cl_mem length] freeWhenDone:false ];
-    void *values = (void *)[data bytes];
-    memcpy ( m_ptr, values, sizeof([m_cl_mem length]) );
+    if (errors) {
+        NSLog(@"METAL_ERROR %s(%d) %d:%d  errorDescription:%@\r\n", szFunc, line,errors);
+        
+    }
 }
 
-void clEnqueueCopyBuffer(id    /* command_queue */,
-                         cl_mem src             /* src_buffer */,
-                         cl_mem dst             /* dst_buffer */,
-                         size_t              /* src_offset */,
-                         size_t              /* dst_offset */,
-                         size_t              /* size */,
-                         uint             /* num_events_in_wait_list */,
-                         void *    /* event_wait_list */,
-                         void *          /* event */)
+
+
+void metalEnqueueReadBuffer(id     /* command_queue */,
+                            metal_mem m_metal_mem             /* buffer */,
+                            bool             /* blocking_read */,
+                            size_t              /* offset */,
+                            size_t    size          /* size */,
+                            void *   m_ptr           /* ptr */,
+                            uint             /* num_events_in_wait_list */,
+                            void *    /* event_wait_list */,
+                            void *          /* event */)
+{
+    
+    NSData* data = [NSData dataWithBytesNoCopy:[m_metal_mem contents ] length: [m_metal_mem length] freeWhenDone:false ];
+    float *values = (float *)[data bytes];
+    memcpy ( m_ptr, values,[m_metal_mem length] );
+    
+}
+
+void metalEnqueueCopyBuffer(id    /* command_queue */,
+                            metal_mem src             /* src_buffer */,
+                            metal_mem *dst             /* dst_buffer */,
+                            size_t              /* src_offset */,
+                            size_t              /* dst_offset */,
+                            size_t              /* size */,
+                            uint             /* num_events_in_wait_list */,
+                            void *    /* event_wait_list */,
+                            void *          /* event */)
 {
     NSData* data = [NSData dataWithBytesNoCopy:[src contents ] length: [src length] freeWhenDone:false ];
     
-    dst = [[ometal sharedInstance].device newBufferWithBytes:[data bytes]
-                                                      length:[src length]
-                                                     options:MTLResourceOptionCPUCacheModeDefault];
+    *dst = [[ometal sharedInstance].device newBufferWithBytes:[data bytes]
+                                                       length:[src length]
+                                                      options:MTLResourceOptionCPUCacheModeDefault];
 }
 
-void clOpsinDynamicsImage(float *r, float *g, float *b, const size_t xsize, const size_t ysize)
+void metalOpsinDynamicsImage(float *r, float *g, float *b, const size_t xsize, const size_t ysize)
 {
     size_t channel_size = xsize * ysize * sizeof(float);
     ometal *m_ometal = [ometal sharedInstance];
+    ometal_channels  * rgb = allocMemChannels(channel_size, r, g, b);
     
-    ocl_channels  * rgb = allocMemChannels(channel_size, r, g, b);
+    metalOpsinDynamicsImageEx(rgb, xsize, ysize);
     
-    clOpsinDynamicsImageEx(rgb, xsize, ysize);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, rgb->r, false, 0, channel_size, r, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, rgb->g, false, 0, channel_size, g, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, rgb->b, false, 0, channel_size, b, 0, NULL, NULL);
     
-    clEnqueueReadBuffer(m_ometal.commandQueue, rgb->r, false, 0, channel_size, r, 0, NULL, NULL);
-    clEnqueueReadBuffer(m_ometal.commandQueue, rgb->g, false, 0, channel_size, g, 0, NULL, NULL);
-    clEnqueueReadBuffer(m_ometal.commandQueue, rgb->b, false, 0, channel_size, b, 0, NULL, NULL);
-    //   clFinish(m_ometal.commandQueue);
-    
-    //    m_ometal.releaseMemChannels(rgb);
 }
 
-void clDiffmapOpsinDynamicsImage(
-                                 float* result,
-                                 const float* r,  const float* g,  const float* b,
-                                 const float* r2, const float* g2, const float* b2,
-                                 const size_t xsize, const size_t ysize,
-                                 const size_t step)
+void metalDiffmapOpsinDynamicsImage(
+                                    float* result,
+                                    const float* r,  const float* g,  const float* b,
+                                    const float* r2, const float* g2, const float* b2,
+                                    const size_t xsize, const size_t ysize,
+                                    const size_t step)
 {
     size_t channel_size = xsize * ysize * sizeof(float);
     
     ometal *m_ometal = [ometal sharedInstance];
-    ocl_channels  *xyb0 = allocMemChannels(channel_size, r, g, b);
-    ocl_channels  *xyb1 = allocMemChannels(channel_size, r2, g2, b2);
+    ometal_channels  *xyb0 = allocMemChannels(channel_size, r, g, b);
+    ometal_channels  *xyb1 = allocMemChannels(channel_size, r2, g2, b2);
     
-    cl_mem mem_result = allocMem(channel_size, result);
+    metal_mem mem_result = allocMem(channel_size, result);
     
-    clDiffmapOpsinDynamicsImageEx(mem_result, xyb0, xyb1, xsize, ysize, step);
+    metalDiffmapOpsinDynamicsImageEx(mem_result, xyb0, xyb1, xsize, ysize, step);
     
-    clEnqueueReadBuffer(m_ometal.commandQueue, mem_result, false, 0, channel_size, result, 0, NULL, NULL);
-    //   int err = clFinish(m_ometal.commandQueue);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, mem_result, false, 0, channel_size, result, 0, NULL, NULL);
     
-    //    m_ometal.releaseMemChannels(xyb1);
-    //    m_ometal.releaseMemChannels(xyb0);
-    
-    //    clReleaseMemObject(mem_result);
 }
 
-void clComputeBlockZeroingOrder(
-                                guetzli::CoeffData *output_order_batch,
-                                const channel_info orig_channel[3],
-                                const float *orig_image_batch,
-                                const float *mask_scale,
-                                const int image_width,
-                                const int image_height,
-                                const channel_info mayout_channel[3],
-                                const int factor,
-                                const int comp_mask,
-                                const float BlockErrorLimit)
+void metalComputeBlockZeroingOrder(
+                                   guetzli::CoeffData *output_order_batch,
+                                   const channel_info orig_channel[3],
+                                   const float *orig_image_batch,
+                                   const float *mask_scale,
+                                   const int image_width,
+                                   const int image_height,
+                                   const channel_info mayout_channel[3],
+                                   const int factor,
+                                   const int comp_mask,
+                                   const float BlockErrorLimit)
 {
     const int block8_width = (image_width + 8 - 1) / 8;
     const int block8_height = (image_height + 8 - 1) / 8;
@@ -116,26 +122,26 @@ void clComputeBlockZeroingOrder(
     
     ometal *m_ometal = [ometal sharedInstance];
     
-    cl_mem mem_orig_coeff[3];
-    cl_mem mem_mayout_coeff[3];
-    cl_mem mem_mayout_pixel[3];
+    metal_mem mem_orig_coeff[3];
+    metal_mem mem_mayout_coeff[3];
+    metal_mem mem_mayout_pixel[3];
     for (int c = 0; c < 3; c++)
     {
         int block_count = orig_channel[c].block_width * orig_channel[c].block_height;
         mem_orig_coeff[c] = allocMem(block_count * sizeof(::coeff_t) * kDCTBlockSize, orig_channel[c].coeff);
-
+        
         
         block_count = mayout_channel[c].block_width * mayout_channel[c].block_height;
         mem_mayout_coeff[c] = allocMem(block_count * sizeof(::coeff_t) * kDCTBlockSize, mayout_channel[c].coeff);
         
         mem_mayout_pixel[c] = allocMem(image_width * image_height * sizeof(uint16_t), mayout_channel[c].pixel);
     }
-    cl_mem mem_orig_image = allocMem(sizeof(float) * 3 * kDCTBlockSize * block8_width * block8_height, orig_image_batch);
-    cl_mem mem_mask_scale = allocMem(sizeof(float) * 3 * block8_width * block8_height, mask_scale);
+    metal_mem mem_orig_image = allocMem(sizeof(float) * 3 * kDCTBlockSize * block8_width * block8_height, orig_image_batch);
+    metal_mem mem_mask_scale = allocMem(sizeof(float) * 3 * block8_width * block8_height, mask_scale);
     
     int output_order_batch_size = sizeof(CoeffData) * 3 * kDCTBlockSize * blockf_width * blockf_height;
-    cl_mem mem_output_order_batch = allocMem(output_order_batch_size, output_order_batch);
-
+    metal_mem mem_output_order_batch = allocMem(output_order_batch_size, output_order_batch);
+    
     id<MTLBuffer> blockf_widthBuffer =[m_ometal.device newBufferWithBytes:&blockf_width
                                                                    length:sizeof(&blockf_width)
                                                                   options:MTLResourceOptionCPUCacheModeDefault];
@@ -212,43 +218,44 @@ void clComputeBlockZeroingOrder(
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
     
 }
 
-void clMask(
-            float* mask_r,  float* mask_g,    float* mask_b,
-            float* maskdc_r, float* maskdc_g, float* maskdc_b,
-            const size_t xsize, const size_t ysize,
-            const float* r,  const float* g,  const float* b,
-            const float* r2, const float* g2, const float* b2)
+void metalMask(
+               float* mask_r,  float* mask_g,    float* mask_b,
+               float* maskdc_r, float* maskdc_g, float* maskdc_b,
+               const size_t xsize, const size_t ysize,
+               const float* r,  const float* g,  const float* b,
+               const float* r2, const float* g2, const float* b2)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
     size_t channel_size = xsize * ysize * sizeof(float);
     
-    ocl_channels  * rgb = allocMemChannels(channel_size, r, g, b);
-    ocl_channels  * rgb2 = allocMemChannels(channel_size, r2, g2, b2);
-    ocl_channels  * mask = allocMemChannels(channel_size,NULL,NULL,NULL);
-    ocl_channels  * mask_dc = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * rgb = allocMemChannels(channel_size, r, g, b);
+    ometal_channels  * rgb2 = allocMemChannels(channel_size, r2, g2, b2);
+    ometal_channels  * mask = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * mask_dc = allocMemChannels(channel_size,NULL,NULL,NULL);
     
-    clMaskEx(mask, mask_dc, rgb, rgb2, xsize, ysize);
+    metalMaskEx(mask, mask_dc, rgb, rgb2, xsize, ysize);
     
-    clEnqueueReadBuffer(m_ometal.commandQueue, mask->r, false, 0, channel_size, mask_r, 0, NULL, NULL);
-    clEnqueueReadBuffer(m_ometal.commandQueue, mask->g, false, 0, channel_size, mask_g, 0, NULL, NULL);
-    clEnqueueReadBuffer(m_ometal.commandQueue, mask->b, false, 0, channel_size, mask_b, 0, NULL, NULL);
-    clEnqueueReadBuffer(m_ometal.commandQueue, mask_dc->r, false, 0, channel_size, maskdc_r, 0, NULL, NULL);
-    clEnqueueReadBuffer(m_ometal.commandQueue, mask_dc->g, false, 0, channel_size, maskdc_g, 0, NULL, NULL);
-    clEnqueueReadBuffer(m_ometal.commandQueue, mask_dc->b, false, 0, channel_size, maskdc_b, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, mask->r, false, 0, channel_size, mask_r, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, mask->g, false, 0, channel_size, mask_g, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, mask->b, false, 0, channel_size, mask_b, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, mask_dc->r, false, 0, channel_size, maskdc_r, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, mask_dc->g, false, 0, channel_size, maskdc_g, 0, NULL, NULL);
+    metalEnqueueReadBuffer(m_ometal.commandQueue, mask_dc->b, false, 0, channel_size, maskdc_b, 0, NULL, NULL);
 }
 
-void clDiffmapOpsinDynamicsImageEx(
-                                   cl_mem result,
-                                   ocl_channels  * xyb0,
-                                   ocl_channels  * xyb1,
-                                   const size_t xsize, const size_t ysize,
-                                   const size_t step)
+void metalDiffmapOpsinDynamicsImageEx(
+                                      metal_mem result,
+                                      ometal_channels  * xyb0,
+                                      ometal_channels  * xyb1,
+                                      const size_t xsize, const size_t ysize,
+                                      const size_t step)
 {
-
+    
     
     const size_t res_xsize = (xsize + step - 1) / step;
     const size_t res_ysize = (ysize + step - 1) / step;
@@ -256,235 +263,43 @@ void clDiffmapOpsinDynamicsImageEx(
     size_t channel_size = xsize * ysize * sizeof(float);
     size_t channel_step_size = res_xsize * res_ysize * sizeof(float);
     
-    ometal *m_ometal = [ometal sharedInstance];
+    metal_mem edge_detector_map = allocMem(3 * channel_step_size,NULL);
+    metal_mem block_diff_dc = allocMem(3 * channel_step_size,NULL);
+    metal_mem block_diff_ac = allocMem(3 * channel_step_size,NULL);
     
-    cl_mem edge_detector_map = allocMem(3 * channel_step_size,NULL);
-    cl_mem block_diff_dc = allocMem(3 * channel_step_size,NULL);
-    cl_mem block_diff_ac = allocMem(3 * channel_step_size,NULL);
+    metalMaskHighIntensityChangeEx(xyb0, xyb1, xsize, ysize);
     
-    clMaskHighIntensityChangeEx(xyb0, xyb1, xsize, ysize);
-    
-    clEdgeDetectorMapEx(edge_detector_map, xyb0, xyb1, xsize, ysize, step);
-    clBlockDiffMapEx(block_diff_dc, block_diff_ac, xyb0, xyb1, xsize, ysize, step);
-    clEdgeDetectorLowFreqEx(block_diff_ac, xyb0, xyb1, xsize, ysize, step);
+    metalEdgeDetectorMapEx(edge_detector_map, xyb0, xyb1, xsize, ysize, step);
+    metalBlockDiffMapEx(block_diff_dc, block_diff_ac, xyb0, xyb1, xsize, ysize, step);
+    metalEdgeDetectorLowFreqEx(block_diff_ac, xyb0, xyb1, xsize, ysize, step);
     {
-        ocl_channels  * mask = allocMemChannels(channel_size,NULL,NULL,NULL);
-        ocl_channels  * mask_dc = allocMemChannels(channel_size,NULL,NULL,NULL);
-        clMaskEx(mask, mask_dc, xyb0, xyb1, xsize, ysize);
-        clCombineChannelsEx(result, mask, mask_dc, xsize, ysize, block_diff_dc, block_diff_ac, edge_detector_map, res_xsize, step);
-                
-    }
-    
-    NSData* data1 = [NSData dataWithBytesNoCopy:[edge_detector_map contents ] length: [edge_detector_map length] freeWhenDone:false ];
-    NSData* data2 = [NSData dataWithBytesNoCopy:[block_diff_ac contents ] length: [block_diff_ac length] freeWhenDone:false ];
-    
-    clCalculateDiffmapEx(result, xsize, ysize, step);
-    NSData* data = [NSData dataWithBytesNoCopy:[result contents ] length: [result length] freeWhenDone:false ];
-}
-
-//#define test
-
-#ifdef test
-//#define kernel
-#define DEVICE
-//#define device
-#define THREAD
-#define thread
-#define constant
-
-double Interpolate(constant const double *array, const int size, const double sx) {
-    double ix = fabs(sx);
-    
-    int baseix = (int)(ix);
-    double res;
-    if (baseix >= size - 1) {
-        res = array[size - 1];
-    }
-    else {
-        double mix = ix - baseix;
-        int nextix = baseix + 1;
-        res = array[baseix] + mix * (array[nextix] - array[baseix]);
-    }
-    if (sx < 0) res = -res;
-    return res;
-}
-#define XybLowFreqToVals_inc 5.2511644570349185
-constant double XybLowFreqToVals_lut[21] = {
-    0,
-    1 * XybLowFreqToVals_inc,
-    2 * XybLowFreqToVals_inc,
-    3 * XybLowFreqToVals_inc,
-    4 * XybLowFreqToVals_inc,
-    5 * XybLowFreqToVals_inc,
-    6 * XybLowFreqToVals_inc,
-    7 * XybLowFreqToVals_inc,
-    8 * XybLowFreqToVals_inc,
-    9 * XybLowFreqToVals_inc,
-    10 * XybLowFreqToVals_inc,
-    11 * XybLowFreqToVals_inc,
-    12 * XybLowFreqToVals_inc,
-    13 * XybLowFreqToVals_inc,
-    14 * XybLowFreqToVals_inc,
-    15 * XybLowFreqToVals_inc,
-    16 * XybLowFreqToVals_inc,
-    17 * XybLowFreqToVals_inc,
-    18 * XybLowFreqToVals_inc,
-    19 * XybLowFreqToVals_inc,
-    20 * XybLowFreqToVals_inc,
-};
-
-void XybLowFreqToVals(double x, double y, double z,
-                      thread double *valx, thread double *valy,thread  double *valz) {
-    const double xmul = 6.64482198135;
-    const double ymul = 0.837846224276;
-    const double zmul = 7.34905756986;
-    const double y_to_z_mul = 0.0812519812628;
-    
-    z += y_to_z_mul * y;
-    *valz = z * zmul;
-    *valx = x * xmul;
-    *valy = Interpolate(&XybLowFreqToVals_lut[0], 21, y * ymul);
-}
-
-void XybDiffLowFreqSquaredAccumulate(double r0, double g0, double b0,
-                                     double r1, double g1, double b1,
-                                     double factor, double res[3]) {
-    double valx0, valy0, valz0;
-    double valx1, valy1, valz1;
-    
-    XybLowFreqToVals(r0, g0, b0, &valx0, &valy0, &valz0);
-    if (r1 == 0.0 && g1 == 0.0 && b1 == 0.0) {
-        //PROFILER_ZONE("XybDiff r1=g1=b1=0");
-        res[0] += factor * valx0 * valx0;
-        res[1] += factor * valy0 * valy0;
-        res[2] += factor * valz0 * valz0;
-        return;
-    }
-    XybLowFreqToVals(r1, g1, b1, &valx1, &valy1, &valz1);
-    // Approximate the distance of the colors by their respective distances
-    // to gray.
-    double valx = valx0 - valx1;
-    double valy = valy0 - valy1;
-    double valz = valz0 - valz1;
-    res[0] += factor * valx * valx;
-    res[1] += factor * valy * valy;
-    res[2] += factor * valz * valz;
-}
-
-void Butteraugli8x8CornerEdgeDetectorDiff(
-                                          int pos_x,
-                                          int pos_y,
-                                          int xsize,
-                                          int ysize,
-                                          DEVICE const float *r, DEVICE const float *g, DEVICE const float* b,
-                                          DEVICE const float *r2, DEVICE const float* g2, DEVICE const float *b2,
-                                          THREAD double* diff_xyb)
-{
-    int local_count = 0;
-    double local_xyb[3] = { 0 };
-    const double w = 0.711100840192;
-    
-    int offset[4][2] = { { 0,0 },{ 0,7 },{ 7,0 },{ 7,7 } };
-    int edgeSize = 3;
-    
-    for (int k = 0; k < 4; k++)
-    {
-        int x = pos_x + offset[k][0];
-        int y = pos_y + offset[k][1];
+        ometal_channels  * mask = allocMemChannels(channel_size,NULL,NULL,NULL);
+        ometal_channels  * mask_dc = allocMemChannels(channel_size,NULL,NULL,NULL);
+        metalMaskEx(mask, mask_dc, xyb0, xyb1, xsize, ysize);
+        metalCombineChannelsEx(result, mask, mask_dc, xsize, ysize, block_diff_dc, block_diff_ac, edge_detector_map, res_xsize, step);
         
-        if (x >= edgeSize && x + edgeSize < xsize) {
-            size_t ix = y * xsize + (x - edgeSize);
-            size_t ix2 = ix + 2 * edgeSize;
-            XybDiffLowFreqSquaredAccumulate(
-                                            w * (r[ix] - r[ix2]),
-                                            w * (g[ix] - g[ix2]),
-                                            w * (b[ix] - b[ix2]),
-                                            w * (r2[ix] - r2[ix2]),
-                                            w * (g2[ix] - g2[ix2]),
-                                            w * (b2[ix] - b2[ix2]),
-                                            1.0, local_xyb);
-            ++local_count;
-        }
-        if (y >= edgeSize && y + edgeSize < ysize) {
-            size_t ix = (y - edgeSize) * xsize + x;
-            size_t ix2 = ix + 2 * edgeSize * xsize;
-            XybDiffLowFreqSquaredAccumulate(
-                                            w * (r[ix] - r[ix2]),
-                                            w * (g[ix] - g[ix2]),
-                                            w * (b[ix] - b[ix2]),
-                                            w * (r2[ix] - r2[ix2]),
-                                            w * (g2[ix] - g2[ix2]),
-                                            w * (b2[ix] - b2[ix2]),
-                                            1.0, local_xyb);
-            ++local_count;
-        }
     }
     
-    const double weight = 0.01617112696;
-    const double mul = weight * 8.0 / local_count;
-    for (int i = 0; i < 3; ++i) {
-        diff_xyb[i] += mul * local_xyb[i];
-    }
+    
+    metalCalculateDiffmapEx(&result, xsize, ysize, step);
+    
 }
 
- void clEdgeDetectorMapEx(
-                                DEVICE float *result,
-                                DEVICE  int *res_xsizenum, DEVICE  int *res_ysizenum,
-                                DEVICE  float *r, DEVICE  float *g, DEVICE  float* b,
-                                DEVICE  float *r2, DEVICE  float* g2, DEVICE  float *b2,
-                                DEVICE int *xsizenum, DEVICE int *ysizenum, DEVICE int *stepnum,int x,int y)
-{
-    
-    int step = *stepnum;
-    int xsize = *xsizenum;
-    int ysize = *ysizenum;
-    int res_xsize = *res_xsizenum;
-    int res_ysize = *res_ysizenum;
-    
-    const int res_x = x;
-    const int res_y = y;
-    
-    if (res_x >= res_xsize || res_y >= res_ysize) return;
-    
-    int pos_x = res_x * step;
-    int pos_y = res_y * step;
-    
-    if (pos_x >= xsize - (8 - step)) return;
-    if (pos_y >= ysize - (8 - step)) return;
-    
-    pos_x = fmin(pos_x, xsize - 8);
-    pos_y = fmin(pos_y, ysize - 8);
-    
-    double diff_xyb[3] = { 0.0 };
-    Butteraugli8x8CornerEdgeDetectorDiff(pos_x, pos_y, xsize, ysize,
-                                         r, g, b,
-                                         r2, g2, b2,
-                                         &diff_xyb[0]);
-    
-    int idx = (res_y * res_xsize + res_x) * 3;
-    result[idx] = diff_xyb[0];
-    result[idx + 1] = diff_xyb[1];
-    result[idx + 2] = diff_xyb[2];
-}
 
-#endif
-void clConvolutionEx(
-                     cl_mem result/*out*/,
-                     const cl_mem inp, size_t xsize, size_t ysize,
-                     const cl_mem multipliers, size_t len,
-                     int xstep, int offset, float border_ratio)
+void metalConvolutionEx(
+                        metal_mem result/*out*/,
+                        const metal_mem inp, size_t xsize, size_t ysize,
+                        const metal_mem multipliers, size_t len,
+                        int xstep, int offset, float border_ratio)
 {
     ometal *m_ometal = [ometal sharedInstance];
-
+    
     size_t oxsize = (xsize + xstep - 1) / xstep;
-
+    
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_CONVOLUTION];
     
     id<MTLBuffer> xsizeBuffer =[m_ometal.device newBufferWithBytes:&xsize
                                                             length:sizeof(&xsize)
-                                                           options:MTLResourceOptionCPUCacheModeDefault];
-    id<MTLBuffer> ysizeBuffer =[m_ometal.device newBufferWithBytes:&ysize
-                                                            length:sizeof(&ysize)
                                                            options:MTLResourceOptionCPUCacheModeDefault];
     id<MTLBuffer> lenBuffer =[m_ometal.device newBufferWithBytes:&len
                                                           length:sizeof(&len)
@@ -503,7 +318,7 @@ void clConvolutionEx(
     
     // Create a compute command encoder
     id <MTLComputeCommandEncoder> computeCE = [commandBuffer computeCommandEncoder];
-    //        id <MTLFunction> kernel = [m_ometal.defaultLibrary newFunctionWithName:@"clConvolutionXEx"];
+    //        id <MTLFunction> kernel = [m_ometal.defaultLibrary newFunctionWithName:@"metalConvolutionXEx"];
     NSError *errors;
     id <MTLComputePipelineState> filterState = [m_ometal.device newComputePipelineStateWithFunction:kernel error:&errors];
     
@@ -511,16 +326,15 @@ void clConvolutionEx(
     [computeCE setBuffer:result offset:0 atIndex:0];
     [computeCE setBuffer:inp offset:0 atIndex:1];
     [computeCE setBuffer:xsizeBuffer offset:0 atIndex:2];
-    [computeCE setBuffer:ysizeBuffer offset:0 atIndex:3];
-    [computeCE setBuffer:multipliers offset:0 atIndex:4];
-    [computeCE setBuffer:lenBuffer offset:0 atIndex:5];
-    [computeCE setBuffer:xstepBuffer offset:0 atIndex:6];
-    [computeCE setBuffer:offsetBuffer offset:0 atIndex:7];
-    [computeCE setBuffer:border_ratioBuffer offset:0 atIndex:8];
+    [computeCE setBuffer:multipliers offset:0 atIndex:3];
+    [computeCE setBuffer:lenBuffer offset:0 atIndex:4];
+    [computeCE setBuffer:xstepBuffer offset:0 atIndex:5];
+    [computeCE setBuffer:offsetBuffer offset:0 atIndex:6];
+    [computeCE setBuffer:border_ratioBuffer offset:0 atIndex:7];
     
     
     MTLSize threadsPerGroup = {1, 1, 1};
-    MTLSize numThreadgroups= {xsize+10, ysize+10, 1};
+    MTLSize numThreadgroups= {oxsize, ysize, 1};
     [computeCE dispatchThreadgroups:numThreadgroups
               threadsPerThreadgroup:threadsPerGroup];
     [computeCE endEncoding];
@@ -528,73 +342,20 @@ void clConvolutionEx(
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
-    //LOG_CL_RESULT(err);
-
+    METAL_ERROR(errors);
 }
 
-void clConvolutionXEx(
-                      cl_mem result/*out*/,
-                      const cl_mem inp, size_t xsize, size_t ysize,
-                      const cl_mem multipliers, size_t len,
-                      int xstep, int offset, float border_ratio)
+void metalConvolutionXEx(
+                         metal_mem result/*out*/,
+                         const metal_mem inp, size_t xsize, size_t ysize,
+                         const metal_mem multipliers, size_t len,
+                         int xstep, int offset, float border_ratio)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
-//    static float inA[]={1.0,2.0,3.0,4.0};
-//    static float inB[]={4.0,3.0,2.0,2.1};
-//    static float out[]={0,0,0,0};
-    //test
-//        id<MTLBuffer> inABuffer = [m_ometal.device newBufferWithBytes:inA
-//                                                  length:sizeof(inA)
-//                                                 options:MTLResourceOptionCPUCacheModeDefault];
-//        id<MTLBuffer> inBBuffer = [m_ometal.device newBufferWithBytes:inB
-//                                                  length:sizeof(inB)
-//                                                 options:MTLResourceOptionCPUCacheModeDefault];
-//        id<MTLBuffer> outBuffer = [m_ometal.device newBufferWithBytes:out
-//                                                  length:sizeof(out)
-//                                                 options:MTLResourceOptionCPUCacheModeDefault];
-//    
-//        id <MTLCommandBuffer> commandBuffer1 = [m_ometal.commandQueue commandBuffer];
-//    
-//        // Create a compute command encoder
-//        id <MTLComputeCommandEncoder> computeCE1 = [commandBuffer1 computeCommandEncoder];
-//    
-//    
-//        NSError *errors1;
-//    
-//        id <MTLFunction> func = [m_ometal.defaultLibrary newFunctionWithName:@"kernel_function"];
-//        id <MTLComputePipelineState> filterState1
-//        = [m_ometal.device newComputePipelineStateWithFunction:func error:&errors1];
-//    
-//        [computeCE1 setComputePipelineState:filterState1];
-//        [computeCE1 setBuffer:inABuffer offset:0 atIndex:0];
-//        [computeCE1 setBuffer:inBBuffer offset:0 atIndex:1];
-//        [computeCE1 setBuffer:outBuffer offset:0 atIndex:2];
-//    
-//    
-//    
-//        MTLSize threadsPerGroup1 = {2, 1, 1};
-//        MTLSize numThreadgroups1 = {2, 1, 1};
-//    
-//        [computeCE1 dispatchThreadgroups:numThreadgroups1
-//                  threadsPerThreadgroup:threadsPerGroup1];
-//        [computeCE1 endEncoding];
-//    
-//        // Commit the command buffer
-//        [commandBuffer1 commit];
-//        [commandBuffer1 waitUntilCompleted];
-//    
-//        NSData* outdata = [NSData dataWithBytesNoCopy:[outBuffer contents ] length: sizeof(out) freeWhenDone:false ];
-//    
-//        float *values =(float *) [outdata bytes];
-//        int cnt = [outdata length]/sizeof(float);
-//        for (int i = 0; i < cnt; ++i)
-//            NSLog(@"%f\n", values[i]);
-//    
     
-    //test end
     
-
+    
     
     
     id<MTLBuffer> xsizeBuffer =[m_ometal.device newBufferWithBytes:&xsize
@@ -621,7 +382,7 @@ void clConvolutionXEx(
     // Create a compute command encoder
     id <MTLComputeCommandEncoder> computeCE = [commandBuffer computeCommandEncoder];
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_CONVOLUTIONX];
-    //        id <MTLFunction> kernel = [m_ometal.defaultLibrary newFunctionWithName:@"clConvolutionXEx"];
+    //        id <MTLFunction> kernel = [m_ometal.defaultLibrary newFunctionWithName:@"metalConvolutionXEx"];
     NSError *errors;
     id <MTLComputePipelineState> filterState = [m_ometal.device newComputePipelineStateWithFunction:kernel error:&errors];
     
@@ -638,7 +399,7 @@ void clConvolutionXEx(
     
     
     MTLSize threadsPerGroup = {1, 1, 1};
-    MTLSize numThreadgroups= {xsize+10, ysize+10, 1};
+    MTLSize numThreadgroups= {xsize, ysize, 1};
     [computeCE dispatchThreadgroups:numThreadgroups
               threadsPerThreadgroup:threadsPerGroup];
     [computeCE endEncoding];
@@ -646,24 +407,15 @@ void clConvolutionXEx(
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
-    //LOG_CL_RESULT(err);
-    //err = clFinish(m_ometal.commandQueue);
-    //LOG_CL_RESULT(err);
-
+    METAL_ERROR(errors);
     
-//    NSData* outdata = [NSData dataWithBytesNoCopy:[inp contents ] length: [inp length] freeWhenDone:false ];
-//    NSLog(@"len: %d \n",[inp length]);
-//    float *values =(float *) [outdata bytes];
-//    int cnt = [outdata length]/sizeof(float);
-//    for (int i = 0; i < cnt; ++i)
-//        NSLog(@"%f\n", values[i]);
 }
 
-void clConvolutionYEx(
-                      cl_mem result/*out*/,
-                      const cl_mem inp, size_t xsize, size_t ysize,
-                      const cl_mem multipliers, size_t len,
-                      int xstep, int offset, float border_ratio)
+void metalConvolutionYEx(
+                         metal_mem result/*out*/,
+                         const metal_mem inp, size_t xsize, size_t ysize,
+                         const metal_mem multipliers, size_t len,
+                         int xstep, int offset, float border_ratio)
 {
     
     ometal *m_ometal = [ometal sharedInstance];
@@ -718,13 +470,13 @@ void clConvolutionYEx(
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
-    //NSLog(@"clConvolutionYEx");
+    METAL_ERROR(errors);
 }
 
-void clSquareSampleEx(
-                      cl_mem result/*out*/,
-                      const cl_mem image, size_t xsize, size_t ysize,
-                      size_t xstep, size_t ystep)
+void metalSquareSampleEx(
+                         metal_mem result/*out*/,
+                         const metal_mem image, size_t xsize, size_t ysize,
+                         size_t xstep, size_t ystep)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
@@ -770,11 +522,13 @@ void clSquareSampleEx(
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
 }
 
-void clBlurEx(cl_mem image/*out, opt*/, const size_t xsize, const size_t ysize,
-              const double sigma, const double border_ratio,
-              cl_mem result/*out, opt*/)
+void metalBlurEx(metal_mem image/*out, opt*/, const size_t xsize, const size_t ysize,
+                 const double sigma, const double border_ratio,
+                 metal_mem result/*out, opt*/)
 {
     double m = 2.25;  // Accuracy increases when m is increased.
     const double scaler = -1.0 / (2 * sigma * sigma);
@@ -788,44 +542,38 @@ void clBlurEx(cl_mem image/*out, opt*/, const size_t xsize, const size_t ysize,
     
     const int xstep = std::max<int>(1, int(sigma / 3));
     
-    ometal *m_ometal = [ometal sharedInstance];
-    cl_mem mem_expn = allocMem(sizeof(float) * expn_size, expn.data());
+    metal_mem mem_expn = allocMem(sizeof(float) * expn_size, expn.data());
     
     if (xstep > 1)
     {
-        cl_mem m = allocMem(sizeof(float) * xsize * ysize,NULL);
-        clConvolutionXEx(m, image, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
-        clConvolutionYEx(result ? result : image, m, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
-        clSquareSampleEx(result ? result : image, result ? result : image, xsize, ysize, xstep, xstep);
-        //clReleaseMemObject(m);
+        metal_mem m = allocMem(sizeof(float) * xsize * ysize,NULL);
+        metalConvolutionXEx(m, image, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
+        metalConvolutionYEx(result ? result : image, m, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
+        metalSquareSampleEx(result ? result : image, result ? result : image, xsize, ysize, xstep, xstep);
     }
     else
     {
-        cl_mem m = allocMem(sizeof(float) * xsize * ysize,NULL);
-        clConvolutionXEx(m, image, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
-        clConvolutionYEx(result ? result : image, m, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
-        //clReleaseMemObject(m);
+        metal_mem m = allocMem(sizeof(float) * xsize * ysize,NULL);
+        metalConvolutionXEx(m, image, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
+        metalConvolutionYEx(result ? result : image, m, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
     }
-    
-    // clReleaseMemObject(mem_expn);
-    
     
 }
 
-void clOpsinDynamicsImageEx(ocl_channels  * rgb, const size_t xsize, const size_t ysize)
+void metalOpsinDynamicsImageEx(ometal_channels  * rgb, const size_t xsize, const size_t ysize)
 {
     static const double kSigma = 1.1;
     
     size_t channel_size = xsize * ysize * sizeof(float);
     
     ometal *m_ometal = [ometal sharedInstance];
-    ocl_channels  * rgb_blurred = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * rgb_blurred = allocMemChannels(channel_size,NULL,NULL,NULL);
     
     const int size = xsize * ysize;
     
-    clBlurEx(rgb->r, xsize, ysize, kSigma, 0.0, rgb_blurred->r);
-    clBlurEx(rgb->g, xsize, ysize, kSigma, 0.0, rgb_blurred->g);
-    clBlurEx(rgb->b, xsize, ysize, kSigma, 0.0, rgb_blurred->b);
+    metalBlurEx(rgb->r, xsize, ysize, kSigma, 0.0, rgb_blurred->r);
+    metalBlurEx(rgb->g, xsize, ysize, kSigma, 0.0, rgb_blurred->g);
+    metalBlurEx(rgb->b, xsize, ysize, kSigma, 0.0, rgb_blurred->b);
     
     id<MTLBuffer> sizeBuffer =[m_ometal.device newBufferWithBytes:&size
                                                            length:sizeof(&size)
@@ -858,47 +606,41 @@ void clOpsinDynamicsImageEx(ocl_channels  * rgb, const size_t xsize, const size_
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
-    NSData* data = [NSData dataWithBytesNoCopy:[rgb->r contents ] length: [rgb->r length] freeWhenDone:false ];
-
+    METAL_ERROR(errors);
+    
 }
 
-void clMaskHighIntensityChangeEx(
-                                 ocl_channels  * xyb0/*in,out*/,
-                                 ocl_channels  * xyb1/*in,out*/,
-                                 const size_t xsize, const size_t ysize)
+void metalMaskHighIntensityChangeEx(
+                                    ometal_channels  * xyb0/*in,out*/,
+                                    ometal_channels  * xyb1/*in,out*/,
+                                    const size_t xsize, const size_t ysize)
 {
     size_t channel_size = xsize * ysize * sizeof(float);
     
     ometal *m_ometal = [ometal sharedInstance];
     
-    ocl_channels  * c0 = allocMemChannels(channel_size,NULL,NULL,NULL);
-    ocl_channels  * c1 = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * c0 = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * c1 = allocMemChannels(channel_size,NULL,NULL,NULL);
+    metal_mem  c0r= c0->r;
+    metal_mem  c0g= c0->g;
+    metal_mem  c0b= c0->b;
+    metal_mem  c1r= c1->r;
+    metal_mem  c1g= c1->g;
+    metal_mem  c1b= c1->b;
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, xyb0->r, &c0r, 0, 0, channel_size, 0, NULL, NULL);
+    //NSData* data = [NSData dataWithBytesNoCopy:[c0r contents ] length: [c0r length] freeWhenDone:false ];
     
-    clEnqueueCopyBuffer(m_ometal.commandQueue, xyb0->r, c0->r, 0, 0, channel_size, 0, NULL, NULL);
-    clEnqueueCopyBuffer(m_ometal.commandQueue, xyb0->g, c0->g, 0, 0, channel_size, 0, NULL, NULL);
-    clEnqueueCopyBuffer(m_ometal.commandQueue, xyb0->b, c0->b, 0, 0, channel_size, 0, NULL, NULL);
-    clEnqueueCopyBuffer(m_ometal.commandQueue, xyb1->r, c1->r, 0, 0, channel_size, 0, NULL, NULL);
-    clEnqueueCopyBuffer(m_ometal.commandQueue, xyb1->g, c1->g, 0, 0, channel_size, 0, NULL, NULL);
-    clEnqueueCopyBuffer(m_ometal.commandQueue, xyb1->b, c1->b, 0, 0, channel_size, 0, NULL, NULL);
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, xyb0->g, &c0g, 0, 0, channel_size, 0, NULL, NULL);
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, xyb0->b, &c0b, 0, 0, channel_size, 0, NULL, NULL);
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, xyb1->r, &c1r, 0, 0, channel_size, 0, NULL, NULL);
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, xyb1->g, &c1g, 0, 0, channel_size, 0, NULL, NULL);
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, xyb1->b, &c1b, 0, 0, channel_size, 0, NULL, NULL);
+    
+    
     
     
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_MASKHIGHINTENSITYCHANGE];
-    //    clSetKernelArgEx(kernel,
-    //                     &xyb0->r, &xyb0->g, &xyb0->b,
-    //                     &xsize, &ysize,
-    //                     &xyb1->r, &xyb1->g, &xyb1->b,
-    //                     &c0.r, &c0.g, &c0.b,
-    //                     &c1.r, &c1.g, &c1.b);
-    //
-    //    size_t globalWorkSize[2] = { xsize, ysize };
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
-    //
-    //    m_m_ometal.releaseMemChannels(c0);
-    //    m_ometal.releaseMemChannels(c1);
-    //
+    
     
     
     id<MTLBuffer> xsizeBuffer =[m_ometal.device newBufferWithBytes:&xsize
@@ -928,12 +670,12 @@ void clMaskHighIntensityChangeEx(
     [computeCE setBuffer:xyb1->r offset:0 atIndex:5];
     [computeCE setBuffer:xyb1->g offset:0 atIndex:6];
     [computeCE setBuffer:xyb1->b offset:0 atIndex:7];
-    [computeCE setBuffer:c0->r offset:0 atIndex:8];
-    [computeCE setBuffer:c0->g offset:0 atIndex:9];
-    [computeCE setBuffer:c0->b offset:0 atIndex:10];
-    [computeCE setBuffer:c1->r offset:0 atIndex:11];
-    [computeCE setBuffer:c1->g offset:0 atIndex:12];
-    [computeCE setBuffer:c1->b offset:0 atIndex:13];
+    [computeCE setBuffer:c0r offset:0 atIndex:8];
+    [computeCE setBuffer:c0g offset:0 atIndex:9];
+    [computeCE setBuffer:c0b offset:0 atIndex:10];
+    [computeCE setBuffer:c1r offset:0 atIndex:11];
+    [computeCE setBuffer:c1g offset:0 atIndex:12];
+    [computeCE setBuffer:c1b offset:0 atIndex:13];
     
     MTLSize threadsPerGroup = {1,1, 1};
     MTLSize numThreadgroups= {xsize, ysize, 1};
@@ -944,28 +686,28 @@ void clMaskHighIntensityChangeEx(
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
     
 }
 
-void clEdgeDetectorMapEx(
-                         cl_mem result/*out*/,
-                         const ocl_channels  * rgb, const ocl_channels  * rgb2,
-                         const size_t xsize, const size_t ysize, const size_t step)
+void metalEdgeDetectorMapEx(
+                            metal_mem result/*out*/,
+                            const ometal_channels  * rgb, const ometal_channels  * rgb2,
+                            const size_t xsize, const size_t ysize, const size_t step)
 {
-
+    
     size_t channel_size = xsize * ysize * sizeof(float);
     
     ometal *m_ometal = [ometal sharedInstance];
-    
-    ocl_channels  * rgb_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
-    ocl_channels  * rgb2_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * rgb_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * rgb2_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
     
     static const double kSigma[3] = { 1.5, 0.586, 0.4 };
     
     for (int i = 0; i < 3; i++)
     {
-        clBlurEx(rgb->ch[i], xsize, ysize, kSigma[i], 0.0, rgb_blured->ch[i]);
-        clBlurEx(rgb2->ch[i], xsize, ysize, kSigma[i], 0.0, rgb2_blured->ch[i]);
+        metalBlurEx(rgb->ch[i], xsize, ysize, kSigma[i], 0.0, rgb_blured->ch[i]);
+        metalBlurEx(rgb2->ch[i], xsize, ysize, kSigma[i], 0.0, rgb2_blured->ch[i]);
     }
     
     const size_t res_xsize = (xsize + step - 1) / step;
@@ -1021,15 +763,15 @@ void clEdgeDetectorMapEx(
     // Commit the command buffer
     [commandBuffer commit];
     [commandBuffer waitUntilCompleted];
-    NSData* data1 = [NSData dataWithBytesNoCopy:[result contents ] length: [result length] freeWhenDone:false ];
-    //clEdgeDetectorMapEx((float *)[data1 bytes],&res_xsize,&res_ysize,rgb_blured->r,rgb_blured->g,rgb_blured->b,rgb2_blured->r,rgb2_blured->g,rgb2_blured->b,&xsize,&ysize,&step,0,0);
+    METAL_ERROR(errors);
+    
 }
 
-void clBlockDiffMapEx(
-                      cl_mem block_diff_dc/*out*/,
-                      cl_mem block_diff_ac/*out*/,
-                      const ocl_channels  *rgb, const ocl_channels  *rgb2,
-                      const size_t xsize, const size_t ysize, const size_t step)
+void metalBlockDiffMapEx(
+                         metal_mem block_diff_dc/*out*/,
+                         metal_mem block_diff_ac/*out*/,
+                         const ometal_channels  *rgb, const ometal_channels  *rgb2,
+                         const size_t xsize, const size_t ysize, const size_t step)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
@@ -1063,7 +805,6 @@ void clBlockDiffMapEx(
     NSError *errors;
     id <MTLComputePipelineState> filterState
     = [m_ometal.device newComputePipelineStateWithFunction:kernel error:&errors];
-    
     [computeCE setComputePipelineState:filterState];
     
     [computeCE setBuffer:block_diff_dc offset:0 atIndex:0];
@@ -1081,33 +822,35 @@ void clBlockDiffMapEx(
     [computeCE setBuffer:stepBuffer offset:0 atIndex:12];
     
     MTLSize threadsPerGroup = {1,1, 1};
-    MTLSize numThreadgroups = {res_xsize, res_xsize, 1};
+    MTLSize numThreadgroups = {res_xsize, res_ysize, 1};
     [computeCE dispatchThreadgroups:numThreadgroups
               threadsPerThreadgroup:threadsPerGroup];
     [computeCE endEncoding];
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
     
 }
 
 
-void clEdgeDetectorLowFreqEx(
-                             cl_mem block_diff_ac/*in,out*/,
-                             const ocl_channels  *rgb, const ocl_channels  *rgb2,
-                             const size_t xsize, const size_t ysize, const size_t step)
+void metalEdgeDetectorLowFreqEx(
+                                metal_mem block_diff_ac/*in,out*/,
+                                const ometal_channels  *rgb, const ometal_channels  *rgb2,
+                                const size_t xsize, const size_t ysize, const size_t step)
 {
     size_t channel_size = xsize * ysize * sizeof(float);
     
     static const double kSigma = 14;
     ometal *m_ometal = [ometal sharedInstance];
-    ocl_channels  * rgb_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
-    ocl_channels  * rgb2_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * rgb_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
+    ometal_channels  * rgb2_blured = allocMemChannels(channel_size,NULL,NULL,NULL);
     
     for (int i = 0; i < 3; i++)
     {
-        clBlurEx(rgb->ch[i], xsize, ysize, kSigma, 0.0, rgb_blured->ch[i]);
-        clBlurEx(rgb2->ch[i], xsize, ysize, kSigma, 0.0, rgb2_blured->ch[i]);
+        metalBlurEx(rgb->ch[i], xsize, ysize, kSigma, 0.0, rgb_blured->ch[i]);
+        metalBlurEx(rgb2->ch[i], xsize, ysize, kSigma, 0.0, rgb2_blured->ch[i]);
     }
     
     const size_t res_xsize = (xsize + step - 1) / step;
@@ -1162,13 +905,17 @@ void clEdgeDetectorLowFreqEx(
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
 }
 
-void clDiffPrecomputeEx(
-                        ocl_channels  *mask/*out*/,
-                        const ocl_channels  *xyb0, const ocl_channels  *xyb1,
-                        const size_t xsize, const size_t ysize)
+void metalDiffPrecomputeEx(
+                           ometal_channels  *mask/*out*/,
+                           const ometal_channels  *xyb0, const ometal_channels  *xyb1,
+                           const size_t xsize, const size_t ysize)
 {
+    
     ometal *m_ometal = [ometal sharedInstance];
     
     
@@ -1212,15 +959,14 @@ void clDiffPrecomputeEx(
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
 }
 
-void clScaleImageEx(cl_mem img/*in, out*/, size_t size, double w)
+void metalScaleImageEx(metal_mem img/*in, out*/, size_t size, double w)
 {
-    //NSData* data1 = [NSData dataWithBytesNoCopy:[img contents ] length: [img length] freeWhenDone:false ];
-//    float *values =(float *) [data1 bytes];
-//    int cnt = [data1 length]/sizeof(float);
-//    for (int i = 0; i < 2; ++i)
-//    NSLog(@"%f\n", values[i]);
+    
     ometal *m_ometal = [ometal sharedInstance];
     float fw = w;
     
@@ -1255,11 +1001,12 @@ void clScaleImageEx(cl_mem img/*in, out*/, size_t size, double w)
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
     
-    //NSData* data = [NSData dataWithBytesNoCopy:[img contents ] length: [img length] freeWhenDone:false ];
+    METAL_ERROR(errors);
 }
 
-void clAverage5x5Ex(cl_mem img/*in,out*/, const size_t xsize, const size_t ysize)
+void metalAverage5x5Ex(metal_mem img/*in,out*/, const size_t xsize, const size_t ysize)
 {
     if (xsize < 4 || ysize < 4) {
         // TODO: Make this work for small dimensions as well.
@@ -1269,22 +1016,11 @@ void clAverage5x5Ex(cl_mem img/*in,out*/, const size_t xsize, const size_t ysize
     ometal *m_ometal = [ometal sharedInstance];
     
     size_t len = xsize * ysize * sizeof(float);
-    cl_mem img_org = allocMem(len,NULL);
+    metal_mem img_org = allocMem(len,NULL);
     
-    clEnqueueCopyBuffer(m_ometal.commandQueue, img, img_org, 0, 0, len, 0, NULL, NULL);
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, img, &img_org, 0, 0, len, 0, NULL, NULL);
     
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_AVERAGE5X5];
-    //    clSetKernelArgEx(kernel, &img, &xsize, &ysize, &img_org);
-    //
-    //    size_t globalWorkSize[2] = { xsize, ysize };
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
-    //
-    //    clReleaseMemObject(img_org);
-    
-    
     id <MTLCommandBuffer> commandBuffer = [m_ometal.commandQueue commandBuffer];
     
     // Create a compute command encoder
@@ -1314,31 +1050,21 @@ void clAverage5x5Ex(cl_mem img/*in,out*/, const size_t xsize, const size_t ysize
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
 }
 
-void clMinSquareValEx(
-                      cl_mem img/*in,out*/,
-                      const size_t xsize, const size_t ysize,
-                      const size_t square_size, const size_t offset)
+metal_mem metalMinSquareValEx(
+                              metal_mem img/*in,out*/,
+                              const size_t xsize, const size_t ysize,
+                              const size_t square_size, const size_t offset,int unuse)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
-    cl_mem result = allocMem(sizeof(float) * xsize * ysize,NULL);
+    metal_mem result = allocMem(sizeof(float) * xsize * ysize,NULL);
     
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_MINSQUAREVAL];
-    //    clSetKernelArgEx(kernel, &result, &xsize, &ysize, &img, &square_size, &offset);
-    //
-    //    size_t globalWorkSize[2] = { xsize, ysize };
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clEnqueueCopyBuffer(m_ometal.commandQueue, result, img, 0, 0, sizeof(float) * xsize * ysize, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
-    //    clReleaseMemObject(result);
-    
-    
-    
     id <MTLCommandBuffer> commandBuffer = [m_ometal.commandQueue commandBuffer];
     
     // Create a compute command encoder
@@ -1374,8 +1100,11 @@ void clMinSquareValEx(
               threadsPerThreadgroup:threadsPerGroup];
     [computeCE endEncoding];
     
-    // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
+    return result;
     
 }
 
@@ -1393,7 +1122,7 @@ static void MakeMask(double extmul, double extoff,
 static const double kInternalGoodQualityThreshold = 14.921561160295326;
 static const double kGlobalScale = 1.0 / kInternalGoodQualityThreshold;
 
-void clDoMask(ocl_channels  * mask/*in, out*/, ocl_channels  * mask_dc/*in, out*/, size_t xsize, size_t ysize)
+void metalDoMask(ometal_channels  * mask/*in, out*/, ometal_channels  * mask_dc/*in, out*/, size_t xsize, size_t ysize)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
@@ -1475,27 +1204,26 @@ void clDoMask(ocl_channels  * mask/*in, out*/, ocl_channels  * mask_dc/*in, out*
         MakeMask(extmul, extoff, mul, offset, scaler, lut_dcb);
     }
     
-    size_t channel_size = 512 * sizeof(double);
-    ocl_channels  * xyb = allocMemChannels(channel_size, lut_x, lut_y, lut_b);
-    ocl_channels  * xyb_dc = allocMemChannels(channel_size, lut_dcx, lut_dcy, lut_dcb);
+    static float lut_xf[512] = {0};
+    static float lut_yf[512] = {0};
+    static float lut_bf[512] = {0};
+    static float lut_dcxf[512] = {0};
+    static float lut_dcyf[512] = {0};
+    static float lut_dcbf[512] = {0};
+    for (int i =0 ; i<512; i++) {
+        lut_xf[i] = lut_x[i] ;
+        lut_yf[i] = lut_y[i] ;
+        lut_bf[i] = lut_b[i] ;
+        lut_dcxf[i] = lut_dcx[i] ;
+        lut_dcyf[i] = lut_dcy[i] ;
+        lut_dcbf[i] = lut_dcb[i] ;
+    }
+    
+    size_t channel_size = 512 * sizeof(float);
+    ometal_channels  * xyb = allocMemChannels(channel_size, lut_xf, lut_yf, lut_bf);
+    ometal_channels  * xyb_dc = allocMemChannels(channel_size, lut_dcxf, lut_dcyf, lut_dcbf);
     
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_DOMASK];
-    //    clSetKernelArgEx(kernel, &mask->r, &mask->g, &mask->b,
-    //                     &xsize, &ysize,
-    //                     &mask_dc->r, &mask_dc->g, &mask_dc->b,
-    //                     &xyb.x, &xyb.y, &xyb.b,
-    //                     &xyb_dc.x, &xyb_dc.y, &xyb_dc.b);
-    //
-    //    size_t globalWorkSize[2] = { xsize, ysize };
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
-    //
-    //    m_ometal.releaseMemChannels(xyb);
-    //    m_ometal.releaseMemChannels(xyb_dc);
-    
-    
     id <MTLCommandBuffer> commandBuffer = [m_ometal.commandQueue commandBuffer];
     
     // Create a compute command encoder
@@ -1536,75 +1264,71 @@ void clDoMask(ocl_channels  * mask/*in, out*/, ocl_channels  * mask_dc/*in, out*
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
+    
 }
 
-void clMaskEx(
-              ocl_channels  * mask/*out*/, ocl_channels  * mask_dc/*out*/,
-              const ocl_channels  *rgb, const ocl_channels  *rgb2,
-              const size_t xsize, const size_t ysize)
+void metalMaskEx(
+                 ometal_channels  * mask/*out*/, ometal_channels  * mask_dc/*out*/,
+                 const ometal_channels  *rgb, const ometal_channels  *rgb2,
+                 const size_t xsize, const size_t ysize)
 {
-
-    clDiffPrecomputeEx(mask, rgb, rgb2, xsize, ysize);
+    
+    metalDiffPrecomputeEx(mask, rgb, rgb2, xsize, ysize);
     for (int i = 0; i < 3; i++)
     {
-        clAverage5x5Ex(mask->ch[i], xsize, ysize);
-        clMinSquareValEx(mask->ch[i], xsize, ysize, 4, 0);
+        metalAverage5x5Ex(mask->ch[i], xsize, ysize);
+        mask->ch[i] = metalMinSquareValEx(mask->ch[i], xsize, ysize, 4, 0,0);
         
         static const double sigma[3] = {
             9.65781083553,
             14.2644604355,
             4.53358927369,
         };
+        {
+            
+            metalBlurEx(mask->ch[i], xsize, ysize, sigma[i], 0.0);
+        }
         
-        clBlurEx(mask->ch[i], xsize, ysize, sigma[i], 0.0);
     }
+    //到此为止数据正常
     
-    clDoMask(mask, mask_dc, xsize, ysize);
-    NSData* data1 = [NSData dataWithBytesNoCopy:[mask->r contents ] length: [mask->r length] freeWhenDone:false ];
+    
+    metalDoMask(mask, mask_dc, xsize, ysize);//出了问题
+    
+    //从这里开始数据不对
     for (int i = 0; i < 3; i++)
     {
-        clScaleImageEx(mask->ch[i], xsize * ysize, kGlobalScale * kGlobalScale);
-        clScaleImageEx(mask_dc->ch[i], xsize * ysize, kGlobalScale * kGlobalScale);
+        
+        {
+            metalScaleImageEx(mask->ch[i], xsize * ysize, kGlobalScale * kGlobalScale);
+            metalScaleImageEx(mask_dc->ch[i], xsize * ysize, kGlobalScale * kGlobalScale);
+        }
+        
+        
+        
     }
 }
 
-void clCombineChannelsEx(
-                         cl_mem result/*out*/,
-                         const ocl_channels  *mask,
-                         const ocl_channels  *mask_dc,
-                         const size_t xsize, const size_t ysize,
-                         const cl_mem block_diff_dc,
-                         const cl_mem block_diff_ac,
-                         const cl_mem edge_detector_map,
-                         const size_t res_xsize,
-                         const size_t step)
+void metalCombineChannelsEx(
+                            metal_mem result/*out*/,
+                            const ometal_channels  *mask,
+                            const ometal_channels  *mask_dc,
+                            const size_t xsize, const size_t ysize,
+                            const metal_mem block_diff_dc,
+                            const metal_mem block_diff_ac,
+                            const metal_mem edge_detector_map,
+                            const size_t res_xsize,
+                            const size_t step)
 {
-    
-    
-    
-    NSData* data = [NSData dataWithBytesNoCopy:[mask->r contents ] length: [mask->r length] freeWhenDone:false ];
-    NSData* data1 = [NSData dataWithBytesNoCopy:[mask_dc->r contents ] length: [mask_dc->r length] freeWhenDone:false ];
-
     ometal *m_ometal = [ometal sharedInstance];
     
     const size_t work_xsize = ((xsize - 8 + step) + step - 1) / step;
     const size_t work_ysize = ((ysize - 8 + step) + step - 1) / step;
     
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_COMBINECHANNELS];
-    //    clSetKernelArgEx(kernel, &result,
-    //                     &mask->r, &mask->g, &mask->b,
-    //                     &mask_dc->r, &mask_dc->g, &mask_dc->b,
-    //                     &xsize, &ysize,
-    //                     &block_diff_dc, &block_diff_ac,
-    //                     &edge_detector_map,
-    //                     &res_xsize,
-    //                     &step);
-    //
-    //    size_t globalWorkSize[2] = { work_xsize, work_ysize };
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
     
     
     id <MTLCommandBuffer> commandBuffer = [m_ometal.commandQueue commandBuffer];
@@ -1646,41 +1370,31 @@ void clCombineChannelsEx(
     
     
     MTLSize threadsPerGroup = {1,1, 1};
-    MTLSize numThreadgroups = {xsize, ysize, 1};
+    MTLSize numThreadgroups = {work_xsize, work_ysize, 1};
     [computeCE dispatchThreadgroups:numThreadgroups
               threadsPerThreadgroup:threadsPerGroup];
     [computeCE endEncoding];
     
     // Commit the command buffer
     [commandBuffer commit];
-    NSData* data2 = [NSData dataWithBytesNoCopy:[result contents ] length: [result length] freeWhenDone:false ];
-
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
 }
 
-void clUpsampleSquareRootEx(cl_mem diffmap, const size_t xsize, const size_t ysize, const int step)
+void metalUpsampleSquareRootEx(metal_mem *diffmap, const size_t xsize, const size_t ysize, const int step)
 {
     
     
     
     ometal *m_ometal = [ometal sharedInstance];
     
-    cl_mem diffmap_out = allocMem(xsize * ysize * sizeof(float),NULL);
+    metal_mem diffmap_out = allocMem(xsize * ysize * sizeof(float),NULL);
     
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_UPSAMPLESQUAREROOT];
-    //    clSetKernelArgEx(kernel, &diffmap_out, &diffmap, &xsize, &ysize, &step);
     
     const size_t res_xsize = (xsize + step - 1) / step;
     const size_t res_ysize = (ysize + step - 1) / step;
-    
-    //    size_t globalWorkSize[2] = { res_xsize, res_ysize };
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
-    //
-    //    clReleaseMemObject(diffmap_out);
     
     id<MTLBuffer> xsizeBuffer =[m_ometal.device newBufferWithBytes:&xsize
                                                             length:sizeof(&xsize)
@@ -1703,7 +1417,7 @@ void clUpsampleSquareRootEx(cl_mem diffmap, const size_t xsize, const size_t ysi
     
     [computeCE setComputePipelineState:filterState];
     [computeCE setBuffer:diffmap_out offset:0 atIndex:0];
-    [computeCE setBuffer:diffmap offset:0 atIndex:1];
+    [computeCE setBuffer:*diffmap offset:0 atIndex:1];
     [computeCE setBuffer:xsizeBuffer offset:0 atIndex:2];
     [computeCE setBuffer:ysizeBuffer offset:0 atIndex:3];
     [computeCE setBuffer:stepBuffer offset:0 atIndex:4];
@@ -1718,32 +1432,23 @@ void clUpsampleSquareRootEx(cl_mem diffmap, const size_t xsize, const size_t ysi
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
     
-    
-    
-    //NSData* data = [NSData dataWithBytesNoCopy:[diffmap_out contents ] length: [diffmap_out length] freeWhenDone:false ];
-    //NSData* data1 = [NSData dataWithBytesNoCopy:[diffmap contents ] length: [diffmap length] freeWhenDone:false ];
-    clEnqueueCopyBuffer(m_ometal.commandQueue, diffmap_out, diffmap, 0, 0, xsize * ysize * sizeof(float), 0, NULL, NULL);
+    metalEnqueueCopyBuffer(m_ometal.commandQueue, diffmap_out, diffmap, 0, 0, xsize * ysize * sizeof(float), 0, NULL, NULL);
 }
 
-void clRemoveBorderEx(cl_mem out, const cl_mem in, const size_t xsize, const size_t ysize, const int step)
+void metalRemoveBorderEx(metal_mem out, const metal_mem in, const size_t xsize, const size_t ysize, const int step)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
-    int cls = 8 - step;
-    int cls2 = (8 - step) / 2;
+    int metals = 8 - step;
+    int metals2 = (8 - step) / 2;
     
-    int out_xsize = xsize - cls;
-    int out_ysize = ysize - cls;
+    size_t out_xsize = xsize - metals;
+    size_t out_ysize = ysize - metals;
     
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_REMOVEBORDER];
-    //    clSetKernelArgEx(kernel, &out, &out_xsize, &out_ysize, &in, &cls, &cls2);
-    //
-    //    size_t globalWorkSize[2] = { out_xsize, out_ysize};
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
     
     
     id <MTLCommandBuffer> commandBuffer = [m_ometal.commandQueue commandBuffer];
@@ -1756,12 +1461,12 @@ void clRemoveBorderEx(cl_mem out, const cl_mem in, const size_t xsize, const siz
     id<MTLBuffer> out_ysizeBuffer =[m_ometal.device newBufferWithBytes:&out_ysize
                                                                 length:sizeof(&out_ysize)
                                                                options:MTLResourceOptionCPUCacheModeDefault];
-    id<MTLBuffer> clsBuffer =[m_ometal.device newBufferWithBytes:&cls
-                                                          length:sizeof(&cls)
-                                                         options:MTLResourceOptionCPUCacheModeDefault];
-    id<MTLBuffer> cls2Buffer =[m_ometal.device newBufferWithBytes:&cls2
-                                                           length:sizeof(&cls2)
-                                                          options:MTLResourceOptionCPUCacheModeDefault];
+    id<MTLBuffer> metalsBuffer =[m_ometal.device newBufferWithBytes:&metals
+                                                             length:sizeof(&metals)
+                                                            options:MTLResourceOptionCPUCacheModeDefault];
+    id<MTLBuffer> metals2Buffer =[m_ometal.device newBufferWithBytes:&metals2
+                                                              length:sizeof(&metals2)
+                                                             options:MTLResourceOptionCPUCacheModeDefault];
     NSError *errors;
     id <MTLComputePipelineState> filterState
     = [m_ometal.device newComputePipelineStateWithFunction:kernel error:&errors];
@@ -1772,37 +1477,31 @@ void clRemoveBorderEx(cl_mem out, const cl_mem in, const size_t xsize, const siz
     [computeCE setBuffer:out_xsizeBuffer offset:0 atIndex:1];
     [computeCE setBuffer:out_ysizeBuffer offset:0 atIndex:2];
     [computeCE setBuffer:in offset:0 atIndex:3];
-    [computeCE setBuffer:clsBuffer offset:0 atIndex:4];
-    [computeCE setBuffer:cls2Buffer offset:0 atIndex:5];
+    [computeCE setBuffer:metalsBuffer offset:0 atIndex:4];
+    [computeCE setBuffer:metals2Buffer offset:0 atIndex:5];
     
     
     
     MTLSize threadsPerGroup = {1,1, 1};
-    MTLSize numThreadgroups = {static_cast<NSUInteger>(out_xsize), static_cast<NSUInteger>(out_ysize), 1};
+    MTLSize numThreadgroups = {out_xsize, out_ysize, 1};
     [computeCE dispatchThreadgroups:numThreadgroups
               threadsPerThreadgroup:threadsPerGroup];
     [computeCE endEncoding];
     
     // Commit the command buffer
     [commandBuffer commit];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
+    
 }
 
-void clAddBorderEx(cl_mem out, size_t xsize, size_t ysize, int step, cl_mem in)
+void metalAddBorderEx(metal_mem out, size_t xsize, size_t ysize, int step, metal_mem in)
 {
     ometal *m_ometal = [ometal sharedInstance];
     
-    int cls = 8 - step;
-    int cls2 = (8 - step) / 2;
+    int metals = 8 - step;
+    int metals2 = (8 - step) / 2;
     id <MTLFunction> kernel =  m_ometal.kernel[KERNEL_ADDBORDER];
-    //    clSetKernelArgEx(kernel, &out, &xsize, &ysize, &cls, &cls2, &in);
-    //
-    //    size_t globalWorkSize[2] = { xsize, ysize};
-    //    int err = clEnqueueNDRangeKernel(m_ometal.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
-    //    LOG_CL_RESULT(err);
-    //    err = clFinish(m_ometal.commandQueue);
-    //    LOG_CL_RESULT(err);
-    
-    
     id <MTLCommandBuffer> commandBuffer = [m_ometal.commandQueue commandBuffer];
     
     // Create a compute command encoder
@@ -1813,12 +1512,12 @@ void clAddBorderEx(cl_mem out, size_t xsize, size_t ysize, int step, cl_mem in)
     id<MTLBuffer> ysizeBuffer =[m_ometal.device newBufferWithBytes:&ysize
                                                             length:sizeof(&ysize)
                                                            options:MTLResourceOptionCPUCacheModeDefault];
-    id<MTLBuffer> clsBuffer =[m_ometal.device newBufferWithBytes:&cls
-                                                          length:sizeof(&cls)
-                                                         options:MTLResourceOptionCPUCacheModeDefault];
-    id<MTLBuffer> cls2Buffer =[m_ometal.device newBufferWithBytes:&cls2
-                                                           length:sizeof(&cls2)
-                                                          options:MTLResourceOptionCPUCacheModeDefault];
+    id<MTLBuffer> metalsBuffer =[m_ometal.device newBufferWithBytes:&metals
+                                                             length:sizeof(&metals)
+                                                            options:MTLResourceOptionCPUCacheModeDefault];
+    id<MTLBuffer> metals2Buffer =[m_ometal.device newBufferWithBytes:&metals2
+                                                              length:sizeof(&metals2)
+                                                             options:MTLResourceOptionCPUCacheModeDefault];
     NSError *errors;
     id <MTLComputePipelineState> filterState
     = [m_ometal.device newComputePipelineStateWithFunction:kernel error:&errors];
@@ -1828,8 +1527,8 @@ void clAddBorderEx(cl_mem out, size_t xsize, size_t ysize, int step, cl_mem in)
     [computeCE setBuffer:out offset:0 atIndex:0];
     [computeCE setBuffer:xsizeBuffer offset:0 atIndex:1];
     [computeCE setBuffer:ysizeBuffer offset:0 atIndex:2];
-    [computeCE setBuffer:clsBuffer offset:0 atIndex:3];
-    [computeCE setBuffer:cls2Buffer offset:0 atIndex:4];
+    [computeCE setBuffer:metalsBuffer offset:0 atIndex:3];
+    [computeCE setBuffer:metals2Buffer offset:0 atIndex:4];
     [computeCE setBuffer:in offset:0 atIndex:5];
     
     
@@ -1842,14 +1541,15 @@ void clAddBorderEx(cl_mem out, size_t xsize, size_t ysize, int step, cl_mem in)
     
     // Commit the command buffer
     [commandBuffer commit];
-    
-    //NSData* data = [NSData dataWithBytesNoCopy:[out contents ] length: [out length] freeWhenDone:false ];
+    [commandBuffer waitUntilCompleted];
+    METAL_ERROR(errors);
 }
 
-void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step)
+void metalCalculateDiffmapEx(metal_mem *diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step)
 {
-    clUpsampleSquareRootEx(diffmap, xsize, ysize, step);
     
+    
+    metalUpsampleSquareRootEx(diffmap, xsize, ysize, step);
     static const double kSigma = 8.8510880283;
     static const double mul1 = 24.8235314874;
     static const double scale = 1.0 / (1.0 + mul1);
@@ -1857,29 +1557,19 @@ void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const si
     const int s = 8 - step;
     int s2 = (8 - step) / 2;
     
-    ometal *m_ometal = [ometal sharedInstance];
-    cl_mem blurred = allocMem((xsize - s) * (ysize - s) * sizeof(float),NULL);
-    clRemoveBorderEx(blurred, diffmap, xsize, ysize, step);
+    metal_mem blurred = allocMem((xsize - s) * (ysize - s) * sizeof(float),NULL);
+    metalRemoveBorderEx(blurred, *diffmap, xsize, ysize, step);
     
     static const double border_ratio = 0.03027655136;
-    clBlurEx(blurred, xsize - s, ysize - s, kSigma, border_ratio);
+    metalBlurEx(blurred, xsize - s, ysize - s, kSigma, border_ratio);
     
-    clAddBorderEx(diffmap, xsize, ysize, step, blurred);
-    clScaleImageEx(diffmap, xsize * ysize, scale);
-    
+    metalAddBorderEx(*diffmap, xsize, ysize, step, blurred);
+    metalScaleImageEx(*diffmap, xsize * ysize, scale);
     
 }
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
 #endif
 
-@interface metalguezli ()
+#endif
 
-
-
-
-
-@end
-@implementation metalguezli
-
-@end

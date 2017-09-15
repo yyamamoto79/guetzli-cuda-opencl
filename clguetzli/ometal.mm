@@ -1,33 +1,30 @@
 //
 //  ometal.m
-//  guetzli_ios_metal
+//  guetzli_ios
 //
-//  Created by 张聪 on 2017/8/15.
-//  Copyright © 2017年 张聪. All rights reserved.
+//  Created by 张聪 on 2017/9/13.
+//  Copyright © 2017年 com.tencent. All rights reserved.
 //
+#ifdef __USE_METAL__
 
 #import "ometal.h"
 
-
-
-
-
-cl_mem allocMem(size_t s, const void *init )
+metal_mem allocMem(size_t s, const void *init )
 {
     
-    cl_mem mem = nil;
+    metal_mem mem = nil;
     if (init) {
         ometal *m_ometal = [ometal sharedInstance];
         mem = [m_ometal.device newBufferWithBytes:init
-                                                  length:s
-                                                 options:MTLResourceOptionCPUCacheModeDefault];
+                                           length:s
+                                          options:MTLResourceOptionCPUCacheModeDefault];
     }
-
+    
     else
     {
         ometal *m_ometal = [ometal sharedInstance];
         mem = [m_ometal.device newBufferWithLength:s
-                                                 options:MTLResourceOptionCPUCacheModeDefault];
+                                           options:MTLResourceOptionCPUCacheModeDefault];
     }
     if (mem) {
         return mem;
@@ -35,11 +32,11 @@ cl_mem allocMem(size_t s, const void *init )
     return NULL;
 }
 
-ocl_channels* allocMemChannels(size_t s, const void *c0, const void *c1, const void *c2)
+ometal_channels* allocMemChannels(size_t s, const void *c0, const void *c1, const void *c2)
 {
     const void *c[3] = { c0, c1, c2 };
     
-    ocl_channels* img = new ocl_channels();
+    ometal_channels* img = new ometal_channels();
     for (int i = 0; i < 3; i++)
     {
         img->ch[i] = allocMem(s, c[i]);
@@ -47,16 +44,6 @@ ocl_channels* allocMemChannels(size_t s, const void *c0, const void *c1, const v
     
     return img;
 }
-
-void releaseMemChannels(ocl_channels &rgb)
-{
-    for (int i = 0; i < 3; i++)
-    {
-//        clReleaseMemObject(rgb.ch[i]);
-        rgb.ch[i] = NULL;
-    }
-}
-
 
 
 @implementation ometal
@@ -80,7 +67,7 @@ static id sharedSingleton = nil;
         self.commandQueue = [self.device newCommandQueue];
         // Get the library that contains the functions compiled into our app bundle
         self.defaultLibrary = [self.device newDefaultLibrary];
-
+        
         self.kernel = [NSMutableArray arrayWithCapacity:KERNEL_COUNT];
         [self.kernel addObject:[self.defaultLibrary newFunctionWithName:@"clConvolutionEx"]];
         [self.kernel addObject:[self.defaultLibrary newFunctionWithName:@"clConvolutionXEx"]];
@@ -114,3 +101,6 @@ static id sharedSingleton = nil;
     return sharedSingleton;
 }
 @end
+#endif
+
+
