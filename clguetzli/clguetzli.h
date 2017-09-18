@@ -158,6 +158,13 @@ void clAddBorderEx(cl_mem out, const size_t xsize, const size_t ysize, const int
 
 void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step);
 
+void clCopyFromJpegComponent(
+    uint16_t* pixel/*out*/, int16_t* coeffs_out/*out*/, 
+    float* coeffs_0, float* coeffs_1, float* coeffs_2, 
+    int factor_x, int factor_y, 
+    int width_in_blocks, int height_in_blocks,
+    const int* quant);
+
 class guetzli::OutputImage;
 
 #ifdef __USE_DOUBLE_AS_FLOAT__
