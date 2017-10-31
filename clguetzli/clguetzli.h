@@ -159,11 +159,25 @@ void clAddBorderEx(cl_mem out, const size_t xsize, const size_t ysize, const int
 void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step);
 
 void clCopyFromJpegComponent(
-    uint16_t* pixel/*out*/, int16_t* coeffs_out/*out*/, 
-    float* coeffs_0, float* coeffs_1, float* coeffs_2, 
-    int factor_x, int factor_y, 
-    int width_in_blocks, int height_in_blocks,
-    const int* quant);
+	coeff_t *output_batch/*in,out*/,
+	uint8_t  *output_idct/*in,out*/,
+	const coeff_t *jpeg_batch/*in*/,
+	const int *quant,
+	const int jpeg_block_width,
+	const int jpeg_block_height,
+	const int output_block_width,
+	const int output_block_height,
+	const int factor,
+	const int output_width,
+	const int output_height);
+
+void clApplyGlobalQuantization(
+	coeff_t *output_batch/*in,out*/,
+	uchar  *output_idct/*out*/,
+	uchar  *output_bool/*out*/,
+	const int* q/*in*/,
+	const int block_width,
+	const int block_height);
 
 class guetzli::OutputImage;
 

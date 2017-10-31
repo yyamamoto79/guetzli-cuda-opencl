@@ -135,6 +135,27 @@ void cuAddBorderEx(cu_mem out, const size_t xsize, const size_t ysize, const int
 
 void cuCalculateDiffmapEx(cu_mem diffmap/*in,out*/, const size_t xsize, const size_t ysize, const int step);
 
+void cuCopyFromJpegComponent(
+	coeff_t *output_batch/*in,out*/,
+	uint8_t  *output_idct/*in,out*/,
+	const coeff_t *jpeg_batch/*in*/,
+	const int *quant,
+	const int jpeg_block_width,
+	const int jpeg_block_height,
+	const int output_block_width,
+	const int output_block_height,
+	const int factor,
+	const int output_width,
+	const int output_height);
+
+void cuApplyGlobalQuantization(
+	coeff_t *output_batch/*in,out*/,
+	uchar  *output_idct/*out*/,
+	uchar  *output_bool/*out*/,
+	const int* q/*in*/,
+	const int block_width,
+	const int block_height);
+
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
 #endif

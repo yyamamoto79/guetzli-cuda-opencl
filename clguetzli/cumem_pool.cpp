@@ -96,13 +96,16 @@ void cu_mem_pool_t::drain()
     size_t total_mem = 0;
     size_t total_block = mem_pool.size();
     cu_mem_block_t *block_candidate = NULL;
-    for (std::list<cu_mem_block_t>::iterator iter = mem_pool.begin(); iter != mem_pool.end(); iter++)
+    for (std::list<cu_mem_block_t>::iterator iter = mem_pool.begin(); iter != mem_pool.end(); )
     {
         if (iter->status == MBS_IDLE) {
             total_mem += iter->size;
             cuMemFree(iter->mem);
             iter = mem_pool.erase(iter);
-        }
+		}
+		else {
+			iter++;
+		}
     }
 
     LogError("mem_pool has %u blocks, and total pool memory is:%f kb, total memory request:%f kb, total alloc count:%d.\r\n", total_block, (float)(total_mem) / 1024, (float)(total_mem_request) / 1024, alloc_count);

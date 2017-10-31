@@ -73,7 +73,9 @@ else
     cuModuleGetFunction(&ocu.kernel[KERNEL_UPSAMPLESQUAREROOT], mod, "clUpsampleSquareRootEx");
     cuModuleGetFunction(&ocu.kernel[KERNEL_REMOVEBORDER], mod, "clRemoveBorderEx");
     cuModuleGetFunction(&ocu.kernel[KERNEL_ADDBORDER], mod, "clAddBorderEx");
-    cuModuleGetFunction(&ocu.kernel[KERNEL_COMPUTEBLOCKZEROINGORDER], mod, "clComputeBlockZeroingOrderEx");
+	cuModuleGetFunction(&ocu.kernel[KERNEL_COMPUTEBLOCKZEROINGORDER], mod, "clComputeBlockZeroingOrderEx");
+	cuModuleGetFunction(&ocu.kernel[KERNEL_COPYFROMJPEGCOMPONENT], mod, "clCopyFromJpegComponentEx");
+	cuModuleGetFunction(&ocu.kernel[KERNEL_APPLYGLOBALQUANTIZATION], mod, "clApplyGlobalQuantizationEx");
 
     cuCtxSetCacheConfig(CU_FUNC_CACHE_PREFER_SHARED);
     cuCtxSetSharedMemConfig(CU_SHARED_MEM_CONFIG_EIGHT_BYTE_BANK_SIZE);

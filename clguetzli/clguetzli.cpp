@@ -4,6 +4,7 @@
 * Author: strongtu@tencent.com
 *         ianhuang@tencent.com
 *         chriskzhou@tencent.com
+*		  stephendeng@tencent.com
 */
 #include "clguetzli.h"
 #include <math.h>
@@ -835,13 +836,99 @@ void clCalculateDiffmapEx(cl_mem diffmap/*in,out*/, const size_t xsize, const si
 }
 
 void clCopyFromJpegComponent(
-    uint16_t* pixel/*out*/, int16_t* coeffs_out/*out*/,
-    float* coeffs_0, float* coeffs_1, float* coeffs_2,
-    int factor_x, int factor_y,
-    int width_in_blocks, int height_in_blocks,
-    const int* quant)
+	coeff_t *output_batch/*in,out*/,
+	uint8_t  *output_idct/*out*/,
+	const coeff_t *jpeg_batch/*in*/,
+	const int *quant,
+	const int jpeg_block_width,
+	const int jpeg_block_height,
+	const int output_block_width,
+	const int output_block_height,
+	const int factor,
+	const int output_width,
+	const int output_height)
 {
+	using namespace guetzli;
 
+	ocl_args_d_t &ocl = getOcl();
+
+	int src_block_count = jpeg_block_width * jpeg_block_height;
+	cl_mem src_coeff = ocl.allocMem(src_block_count * sizeof(::coeff_t) * kDCTBlockSize, jpeg_batch);
+
+	int dst_coeff_size = output_block_width * output_block_height * sizeof(::coeff_t) * kDCTBlockSize;
+	cl_mem dst_coeff = ocl.allocMem(dst_coeff_size, output_batch);
+
+	int dst_idct_size = output_block_width * output_block_height * sizeof(uint8_t)* kDCTBlockSize;
+	cl_mem dst_idct = ocl.allocMem(dst_idct_size, output_idct);
+
+	int src_quant_size = kDCTBlockSize * sizeof(int);
+	cl_mem src_quant = ocl.allocMem(src_quant_size, quant);
+
+	cl_kernel kernel = ocl.kernel[KERNEL_COPYFROMJPEGCOMPONENT];
+	clSetKernelArgEx(kernel, &dst_coeff, &dst_idct,
+		&src_coeff, &src_quant, &jpeg_block_width, &jpeg_block_height,
+		&output_block_width, &output_block_height,
+		&factor, &output_width, &output_height);
+
+	size_t globalWorkSize[2] = { output_block_width, output_block_height };
+	cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
+	LOG_CL_RESULT(err);
+	err = clFinish(ocl.commandQueue);
+	LOG_CL_RESULT(err);
+
+	err = clEnqueueReadBuffer(ocl.commandQueue, dst_coeff, false, 0, dst_coeff_size, output_batch, 0, NULL, NULL);
+	err = clEnqueueReadBuffer(ocl.commandQueue, dst_idct, false, 0, dst_idct_size, output_idct, 0, NULL, NULL);
+	err = clFinish(ocl.commandQueue);
+
+	clReleaseMemObject(src_coeff);
+	clReleaseMemObject(dst_coeff);
+	clReleaseMemObject(dst_idct);
+	clReleaseMemObject(src_quant);
+}
+
+void clApplyGlobalQuantization(
+	coeff_t *output_batch/*in,out*/,
+	uchar  *output_idct/*out*/,
+	uchar  *output_bool/*out*/,
+	const int* q/*in*/,
+	const int block_width,
+	const int block_height)
+{
+	using namespace guetzli;
+
+	ocl_args_d_t &ocl = getOcl();
+
+	int dst_coeff_size = block_width * block_height * sizeof(::coeff_t) * kDCTBlockSize;
+	cl_mem dst_coeff = ocl.allocMem(dst_coeff_size, output_batch);
+
+	int dst_idct_size = block_width * block_height * sizeof(uint8_t)* kDCTBlockSize;
+	cl_mem dst_idct = ocl.allocMem(dst_idct_size, output_idct);
+
+	int dst_bool_size = block_width * block_height * sizeof(uchar);
+	cl_mem dst_bool = ocl.allocMem(dst_bool_size, output_bool);
+
+	int src_q_size = kDCTBlockSize * sizeof(int);
+	cl_mem src_q = ocl.allocMem(src_q_size, q);
+
+	cl_kernel kernel = ocl.kernel[KERNEL_APPLYGLOBALQUANTIZATION];
+	clSetKernelArgEx(kernel, &dst_coeff, &dst_idct,
+		&dst_bool, &src_q, &block_width, &block_height);
+
+	size_t globalWorkSize[2] = { block_width, block_height };
+	cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
+	LOG_CL_RESULT(err);
+	err = clFinish(ocl.commandQueue);
+	LOG_CL_RESULT(err);
+
+	err = clEnqueueReadBuffer(ocl.commandQueue, dst_coeff, false, 0, dst_coeff_size, output_batch, 0, NULL, NULL);
+	err = clEnqueueReadBuffer(ocl.commandQueue, dst_idct, false, 0, dst_idct_size, output_idct, 0, NULL, NULL);
+	err = clEnqueueReadBuffer(ocl.commandQueue, dst_bool, false, 0, dst_bool_size, output_bool, 0, NULL, NULL);
+	err = clFinish(ocl.commandQueue);
+
+	clReleaseMemObject(dst_bool);
+	clReleaseMemObject(dst_coeff);
+	clReleaseMemObject(dst_idct);
+	clReleaseMemObject(src_q);
 }
 
 #ifdef __USE_DOUBLE_AS_FLOAT__

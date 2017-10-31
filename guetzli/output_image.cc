@@ -29,6 +29,7 @@
 #include "guetzli/gamma_correct.h"
 #include "guetzli/preprocess_downsample.h"
 #include "guetzli/quantize.h"
+#include "clguetzli/clguetzli.h"
 
 namespace guetzli {
 
@@ -209,37 +210,201 @@ void OutputImageComponent::UpdatePixelsForBlock(
 }
 
 void OutputImageComponent::CopyFromJpegComponent(const JPEGComponent& comp,
-                                                 int factor_x, int factor_y,
-                                                 const int* quant) {
-  Reset(factor_x, factor_y);
-  assert(width_in_blocks_ <= comp.width_in_blocks);
-  assert(height_in_blocks_ <= comp.height_in_blocks);
-  const size_t src_row_size = comp.width_in_blocks * kDCTBlockSize;
-  for (int block_y = 0; block_y < height_in_blocks_; ++block_y) {
-    const coeff_t* src_coeffs = &comp.coeffs[block_y * src_row_size];
-    for (int block_x = 0; block_x < width_in_blocks_; ++block_x) {
-      coeff_t block[kDCTBlockSize];
-      for (int i = 0; i < kDCTBlockSize; ++i) {
-        block[i] = src_coeffs[i] * quant[i];
-      }
-      SetCoeffBlock(block_x, block_y, block);
-      src_coeffs += kDCTBlockSize;
-    }
-  }
-  memcpy(quant_, quant, sizeof(quant_));
+	int factor_x, int factor_y,
+	const int* quant) {
+	Reset(factor_x, factor_y);
+	assert(width_in_blocks_ <= comp.width_in_blocks);
+	assert(height_in_blocks_ <= comp.height_in_blocks);
+
+	std::vector<coeff_t> output_coeff_gpu(coeffs_);
+	std::vector<uint16_t> output_pixel_gpu(pixels_);
+
+	if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode || MODE_CUDA == g_mathMode) {
+
+		std::vector<uint8_t> output_idct_gpu(width_in_blocks_ * height_in_blocks_ * kDCTBlockSize);
+
+		if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode) {
+#ifdef __USE_OPENCL__
+			clCopyFromJpegComponent(output_coeff_gpu.data(), output_idct_gpu.data(), comp.coeffs.data(), quant, comp.width_in_blocks, comp.height_in_blocks, width_in_blocks_, height_in_blocks_, factor_x, width_, height_);
+#endif
+		}
+		else {
+#ifdef __USE_CUDA__
+			cuCopyFromJpegComponent(output_coeff_gpu.data(), output_idct_gpu.data(), comp.coeffs.data(), quant, comp.width_in_blocks, comp.height_in_blocks, width_in_blocks_, height_in_blocks_, factor_x, width_, height_);
+#endif
+		}
+		for (int block_y = 0; block_y < height_in_blocks_; ++block_y) {
+			for (int block_x = 0; block_x < width_in_blocks_; ++block_x) {
+				int offset = (block_y * width_in_blocks_ + block_x) * kDCTBlockSize;
+				UpdatePixelsForBlock(block_x, block_y, &output_idct_gpu[offset]);
+			}
+		}
+		std::swap(pixels_, output_pixel_gpu);
+	}
+#ifdef __USE_OPENCL__
+	if (MODE_CPU_OPT == g_mathMode || MODE_CPU == g_mathMode || MODE_CHECKCL == g_mathMode)
+#else
+	if (MODE_CPU_OPT == g_mathMode || MODE_CPU == g_mathMode)
+#endif
+	{
+		const size_t src_row_size = comp.width_in_blocks * kDCTBlockSize;
+		for (int block_y = 0; block_y < height_in_blocks_; ++block_y) {
+			const coeff_t* src_coeffs = &comp.coeffs[block_y * src_row_size];
+			for (int block_x = 0; block_x < width_in_blocks_; ++block_x) {
+				coeff_t block[kDCTBlockSize];
+				for (int i = 0; i < kDCTBlockSize; ++i) {
+					block[i] = src_coeffs[i] * quant[i];
+				}
+				SetCoeffBlock(block_x, block_y, block);
+				src_coeffs += kDCTBlockSize;
+			}
+		}
+	}
+
+	if (MODE_OPENCL == g_mathMode || MODE_CUDA == g_mathMode) {
+		memcpy(coeffs_.data(), output_coeff_gpu.data(), output_coeff_gpu.size() * sizeof(coeff_t));
+		memcpy(pixels_.data(), output_pixel_gpu.data(), output_pixel_gpu.size() * sizeof(uint16_t));
+	}
+
+#ifdef __USE_OPENCL__
+	if (MODE_CHECKCL == g_mathMode)
+	{
+		int count = 0;
+		for (int i = 0; i < output_coeff_gpu.size(); i++)
+		{
+			if (coeffs_[i] != output_coeff_gpu[i])
+			{
+				count++;
+			}
+		}
+		if (count > 0)
+		{
+			LogError("CHK %s(%d) %d:%d\r\n", "CopyFromJpegComponent coeff", __LINE__, count, output_coeff_gpu.size());
+		}
+
+		count = 0;
+		for (int i = 0; i < output_pixel_gpu.size(); i++)
+		{
+			if (pixels_[i] != output_pixel_gpu[i])
+			{
+				count++;
+			}
+		}
+		if (count > 0)
+		{
+			LogError("CHK %s(%d) %d:%d\r\n", "CopyFromJpegComponent pixel", __LINE__, count, output_pixel_gpu.size());
+		}
+		else {
+			LogError("");
+		}
+	}
+#endif
+
+	memcpy(quant_, quant, sizeof(quant_));
 }
 
 void OutputImageComponent::ApplyGlobalQuantization(const int q[kDCTBlockSize]) {
-  for (int block_y = 0; block_y < height_in_blocks_; ++block_y) {
-    for (int block_x = 0; block_x < width_in_blocks_; ++block_x) {
-      coeff_t block[kDCTBlockSize];
-      GetCoeffBlock(block_x, block_y, block);
-      if (QuantizeBlock(block, q)) {
-        SetCoeffBlock(block_x, block_y, block);
-      }
-    }
-  }
-  memcpy(quant_, q, sizeof(quant_));
+
+	std::vector<coeff_t> output_coeff_gpu(coeffs_);
+	std::vector<uint16_t> output_pixel_gpu(pixels_);
+
+	if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode || MODE_CUDA == g_mathMode) {
+
+		std::vector<uint8_t> output_idct_gpu(width_in_blocks_ * height_in_blocks_ * kDCTBlockSize);
+		std::vector<uint8_t> output_bool_gpu(width_in_blocks_ * height_in_blocks_);
+
+		if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode) {
+#ifdef __USE_OPENCL__
+			clApplyGlobalQuantization(
+				output_coeff_gpu.data(),
+				output_idct_gpu.data(),
+				output_bool_gpu.data(),
+				q,
+				width_in_blocks_,
+				height_in_blocks_);
+#endif
+		}
+		else {
+#ifdef __USE_CUDA__
+			cuApplyGlobalQuantization(
+				output_coeff_gpu.data(),
+				output_idct_gpu.data(),
+				output_bool_gpu.data(),
+				q,
+				width_in_blocks_,
+				height_in_blocks_);
+#endif
+		}
+		for (int block_y = 0; block_y < height_in_blocks_; ++block_y) {
+			for (int block_x = 0; block_x < width_in_blocks_; ++block_x) {
+				int bool_offset = block_y * width_in_blocks_ + block_x;
+				if (output_bool_gpu[bool_offset]) {
+					int offset = (block_y * width_in_blocks_ + block_x) * kDCTBlockSize;
+					UpdatePixelsForBlock(block_x, block_y, &output_idct_gpu[offset]);
+				}
+			}
+		}
+		std::swap(pixels_, output_pixel_gpu);
+	}
+#ifdef __USE_OPENCL__
+	if (MODE_CPU_OPT == g_mathMode || MODE_CPU == g_mathMode || MODE_CHECKCL == g_mathMode)
+#else
+	if (MODE_CPU_OPT == g_mathMode || MODE_CPU == g_mathMode)
+#endif
+	{
+
+		for (int block_y = 0; block_y < height_in_blocks_; ++block_y) {
+			for (int block_x = 0; block_x < width_in_blocks_; ++block_x) {
+				coeff_t block[kDCTBlockSize];
+				GetCoeffBlock(block_x, block_y, block);
+				if (QuantizeBlock(block, q)) {
+					SetCoeffBlock(block_x, block_y, block);
+				}
+			}
+		}
+
+	}
+
+	if (MODE_OPENCL == g_mathMode || MODE_CUDA == g_mathMode) {
+		memcpy(coeffs_.data(), output_coeff_gpu.data(), output_coeff_gpu.size() * sizeof(coeff_t));
+		memcpy(pixels_.data(), output_pixel_gpu.data(), output_pixel_gpu.size() * sizeof(uint16_t));
+	}
+
+#ifdef __USE_OPENCL__
+	if (MODE_CHECKCL == g_mathMode)
+	{
+		int count = 0;
+		for (int i = 0; i < output_coeff_gpu.size(); i++)
+		{
+			if (coeffs_[i] != output_coeff_gpu[i])
+			{
+				count++;
+			}
+		}
+		if (count > 0)
+		{
+			LogError("CHK %s(%d) %d:%d\r\n", "ApplyGlobalQuantization coeff", __LINE__, count, output_coeff_gpu.size());
+		}
+
+		count = 0;
+		for (int i = 0; i < output_pixel_gpu.size(); i++)
+		{
+			if (pixels_[i] != output_pixel_gpu[i])
+			{
+				count++;
+			}
+		}
+		if (count > 0)
+		{
+			LogError("CHK %s(%d) %d:%d\r\n", "ApplyGlobalQuantization pixel", __LINE__, count, output_pixel_gpu.size());
+		}
+		else {
+			LogError("");
+		}
+	}
+#endif
+
+	memcpy(quant_, q, sizeof(quant_));
 }
 
 OutputImage::OutputImage(int w, int h)

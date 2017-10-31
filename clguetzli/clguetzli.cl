@@ -4,6 +4,7 @@
 * Author: strongtu@tencent.com
 *         ianhuang@tencent.com
 *         chriskzhou@tencent.com
+*         stephendeng@tencent.com
 */
 #ifdef __USE_OPENCL__
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
@@ -92,6 +93,9 @@ __device__ void coeffcopy(coeff_t *dst, const coeff_t *src, int size);
 __device__ void coeffcopy_g(coeff_t *dst, __global const coeff_t *src, int size);
 __device__ int list_erase(IntFloatPairList* list, int idx);
 __device__ int list_push_back(IntFloatPairList* list, int i, float f);
+__device__ void CoeffToIDCT(__private const coeff_t block[8 * 8], uchar out[8 * 8]);
+__device__ coeff_t Quantize(coeff_t raw_coeff, int quant);
+__device__ bool QuantizeBlock(coeff_t block[kDCTBlockSize], __global const int q[kDCTBlockSize]);
 
 __kernel void clConvolutionEx(
 	__global float* result,
@@ -869,6 +873,84 @@ __kernel void clComputeBlockZeroingOrderEx(
             out_count++;
         }
     }
+}
+
+__kernel void clCopyFromJpegComponentEx(
+    __global coeff_t *output_batch,     // Coeffs of output image.
+    __global uchar  *output_idct,
+
+    __global const coeff_t *jpeg_batch,       // Coeffs of Original image.
+
+    __global const int* quant,
+
+    const int  jpeg_block_width,
+	const int  jpeg_block_height,
+    const int  output_block_width,
+	const int  output_block_height,
+    const int factor,
+    const int output_width_, 
+    const int output_height_)
+{ 
+    const int block_x = get_global_id(0);
+    const int block_y = get_global_id(1);
+
+	if (block_x >= output_block_width || block_y >= output_block_height) return;
+
+    int offset_src = (block_y * jpeg_block_width + block_x) * kDCTBlockSize;
+    int offset_dst = (block_y * output_block_width + block_x) * kDCTBlockSize;
+
+	__global const coeff_t* src_coeffs = &jpeg_batch[offset_src];
+
+    coeff_t block[kDCTBlockSize];
+    for (int i = 0; i < kDCTBlockSize; ++i) {
+        block[i] = src_coeffs[i] * quant[i];
+        output_batch[offset_dst + i] = block[i];
+    }
+
+	__global uchar *idct_g = &output_idct[offset_dst];
+	uchar idct[kDCTBlockSize];
+    CoeffToIDCT(block, idct);
+	for (int i = 0; i < kDCTBlockSize; ++i) {
+		idct_g[i] = idct[i];
+	}
+}
+
+__kernel void clApplyGlobalQuantizationEx(
+	__global coeff_t *output_batch,
+	__global uchar  *output_idct,
+	__global uchar  *output_bool,
+	__global const int* q,
+	const int block_width,
+	const int block_height)
+{ 
+	const int block_x = get_global_id(0);
+	const int block_y = get_global_id(1);
+
+	if (block_x >= block_width || block_y >= block_height) return;
+
+	int offset = (block_y * block_width + block_x) * kDCTBlockSize;
+	int bool_offset = (block_y * block_width + block_x);
+
+	__global coeff_t* src_coeffs = &output_batch[offset];
+
+	coeff_t block[kDCTBlockSize];
+	for (int i = 0; i < kDCTBlockSize; ++i) {
+		block[i] = src_coeffs[i];
+	}
+
+	output_bool[bool_offset] = 0;
+	if (QuantizeBlock(block, q)) {
+		output_bool[bool_offset] = 1;
+		for (int i = 0; i < kDCTBlockSize; ++i) {
+			src_coeffs[i] = block[i];
+		}
+		__global uchar *idct_g = &output_idct[offset];
+		uchar idct[kDCTBlockSize];
+		CoeffToIDCT(block, idct);
+		for (int i = 0; i < kDCTBlockSize; ++i) {
+			idct_g[i] = idct[i];
+		}
+	}
 }
 
 __device__ void Butteraugli8x8CornerEdgeDetectorDiff(
@@ -3411,6 +3493,23 @@ __device__ double CompareBlockFactor(const channel_info mayout_channel[3],
         }
         return max_err;
     }
+}
+
+__device__ coeff_t Quantize(coeff_t raw_coeff, int quant) {
+	const int r = raw_coeff % quant;
+	const coeff_t delta =
+		2 * r > quant ? quant - r : (-2) * r > quant ? -quant - r : -r;
+	return raw_coeff + delta;
+}
+
+__device__ bool QuantizeBlock(coeff_t block[kDCTBlockSize], __global const int q[kDCTBlockSize]) {
+	bool changed = false;
+	for (int k = 0; k < kDCTBlockSize; ++k) {
+		coeff_t coeff = Quantize(block[k], q[k]);
+		changed = changed || (coeff != block[k]);
+		block[k] = coeff;
+	}
+	return changed;
 }
 
 #ifdef __USE_DOUBLE_AS_FLOAT__

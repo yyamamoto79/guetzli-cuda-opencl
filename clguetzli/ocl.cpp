@@ -61,6 +61,8 @@ ocl_args_d_t& getOcl(void)
     ocl.kernel[KERNEL_REMOVEBORDER] = clCreateKernel(ocl.program, "clRemoveBorderEx", &err);
     ocl.kernel[KERNEL_ADDBORDER] = clCreateKernel(ocl.program, "clAddBorderEx", &err);
     ocl.kernel[KERNEL_COMPUTEBLOCKZEROINGORDER] = clCreateKernel(ocl.program, "clComputeBlockZeroingOrderEx", &err);
+	ocl.kernel[KERNEL_COPYFROMJPEGCOMPONENT] = clCreateKernel(ocl.program, "clCopyFromJpegComponentEx", &err);
+	ocl.kernel[KERNEL_APPLYGLOBALQUANTIZATION] = clCreateKernel(ocl.program, "clApplyGlobalQuantizationEx", &err);
 
     return ocl;
 }

@@ -786,7 +786,7 @@ void Processor::SelectFrequencyBackEnd(const JPEGData& jpg, OutputImage* img,
         for (int block_y = 0, block_ix = 0; block_y < block_height; ++block_y) {
           for (int block_x = 0; block_x < block_width; ++block_x, ++block_ix) {
             const int last_index = last_indexes[block_ix];
-            const int offset = candidate_coeff_offsets[block_ix];
+            const int offset = std::max(0, std::min(candidate_coeff_offsets[block_ix], ((int)candidate_coeff_errors.size() - 1)));
             const int num_candidates =
                 candidate_coeff_offsets[block_ix + 1] - offset;
             const float* candidate_errors = &candidate_coeff_errors[offset];
@@ -856,7 +856,7 @@ void Processor::SelectFrequencyBackEnd(const JPEGData& jpg, OutputImage* img,
         const int block_x = block_ix % block_width;
         const int block_y = block_ix / block_width;
         const int last_idx = last_indexes[block_ix];
-        const int offset = candidate_coeff_offsets[block_ix];
+        const int offset = std::max(0, std::min(candidate_coeff_offsets[block_ix], ((int)candidate_coeffs.size() - 1)));
         const uint8_t* candidates = &candidate_coeffs[offset];
         const int idx = candidates[last_idx + std::min(direction, 0)];
         const int c = idx / kDCTBlockSize;
