@@ -938,12 +938,13 @@ void cuCopyFromJpegComponent(
 		0,
 		ocu.commandQueue, (void**)args, NULL);
 	LOG_CU_RESULT(err);
-
 	err = cuFinish(ocu.commandQueue);
 	LOG_CU_RESULT(err);
-
-	cuMemcpyDtoH(output_batch, dst_coeff, dst_coeff_size);
-	cuMemcpyDtoH(output_idct, dst_idct, dst_idct_size);
+	
+	cuMemcpyDtoHAsync(output_batch, dst_coeff, dst_coeff_size, ocu.commandQueue);
+	cuMemcpyDtoHAsync(output_idct, dst_idct, dst_idct_size, ocu.commandQueue);
+	err = cuFinish(ocu.commandQueue);
+	LOG_CU_RESULT(err);
 
 	ocu.releaseMem(src_coeff);
 	ocu.releaseMem(dst_coeff);
@@ -985,12 +986,16 @@ void cuApplyGlobalQuantization(
 		0,
 		ocu.commandQueue, (void**)args, NULL);
 	LOG_CU_RESULT(err);
+	
 	err = cuFinish(ocu.commandQueue);
 	LOG_CU_RESULT(err);
 
-	cuMemcpyDtoH(output_batch, dst_coeff, dst_coeff_size);
-	cuMemcpyDtoH(output_idct, dst_idct, dst_idct_size);
-	cuMemcpyDtoH(output_bool, dst_bool, dst_bool_size);
+	cuMemcpyDtoHAsync(output_batch, dst_coeff, dst_coeff_size, ocu.commandQueue);
+	cuMemcpyDtoHAsync(output_idct, dst_idct, dst_idct_size, ocu.commandQueue);
+	cuMemcpyDtoHAsync(output_bool, dst_bool, dst_bool_size, ocu.commandQueue);
+
+	err = cuFinish(ocu.commandQueue);
+	LOG_CU_RESULT(err);
 
 	ocu.releaseMem(dst_bool);
 	ocu.releaseMem(dst_coeff);
