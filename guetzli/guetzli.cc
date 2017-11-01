@@ -306,6 +306,8 @@ int main(int argc, char** argv) {
     Usage();
   }
 
+  getOcu();
+
   timeCounter timer("guetzli");
 
   std::string in_data = ReadFileOrDie(argv[opt_idx]);
