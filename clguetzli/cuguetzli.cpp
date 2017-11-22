@@ -1003,6 +1003,109 @@ void cuApplyGlobalQuantization(
 	ocu.releaseMem(src_q);
 }
 
+void cuComponentsToPixels(
+	uchar *rgb,/*out*/
+	const int xmin,
+	const int ymin,
+	const int xsize,
+	const int ysize,
+	const std::vector<guetzli::OutputImageComponent> &components /*in*/)
+{
+	using namespace guetzli;
+
+	ocu_args_d_t &ocu = getOcu();
+
+	const int stride = 3;
+
+	int out_size = xsize * ysize * stride * sizeof(uchar);
+	cu_mem cl_out = ocu.allocMem(out_size, rgb);
+
+	for (int c = 0; c < stride; ++c)
+	{
+		cu_mem cl_out_offset = cl_out + c;
+
+		const int width = components[c].width();
+		const int height = components[c].height();
+
+		const int yend1 = ymin + ysize;
+		const int yend0 = std::min(yend1, height);
+		const int xend1 = xmin + xsize;
+		const int xend0 = std::min(xend1, width);
+
+		int pixels_size = width * height * sizeof(ushort);
+		cu_mem cl_pixels = ocu.allocMem(pixels_size, components[c].pixels());
+
+		{
+			CUfunction kernel = ocu.kernel[KERNEL_COMPONENTSTOPIXELS];
+			const void *args[] = { &cl_out_offset, 
+				&xmin, &ymin, &xsize, &ysize, &stride,
+				&cl_pixels, &width, &height };
+
+			CUresult err = cuLaunchKernel(kernel,
+				BLOCK_COUNT_X(xend0 - xmin), BLOCK_COUNT_Y(yend0 - ymin), 1,
+				BLOCK_SIZE_X, BLOCK_SIZE_Y, 1,
+				0,
+				ocu.commandQueue, (void**)args, NULL);
+			LOG_CU_RESULT(err);
+
+			err = cuFinish(ocu.commandQueue);
+			LOG_CU_RESULT(err);
+		}
+
+		ocu.releaseMem(cl_pixels);
+
+		if (xend1 - xend0 > 0) {
+			CUfunction kernel = ocu.kernel[KERNEL_COMPONENTSTOPIXELS_EX1];
+			const void *args[] = { &cl_out_offset,
+				&xmin, &ymin, &xsize, &ysize, &stride,
+				&width, &height };
+
+			CUresult err = cuLaunchKernel(kernel,
+				xend1 - xend0, BLOCK_COUNT_Y(yend0 - ymin), 1,
+				1, BLOCK_SIZE_Y, 1,
+				0,
+				ocu.commandQueue, (void**)args, NULL);
+			LOG_CU_RESULT(err);
+
+			err = cuFinish(ocu.commandQueue);
+			LOG_CU_RESULT(err);
+		}
+
+		if (yend1 - yend0 > 0) {
+			CUfunction kernel = ocu.kernel[KERNEL_COMPONENTSTOPIXELS_EX2];
+			const void *args[] = { &cl_out_offset,
+				&xmin, &ymin, &xsize, &ysize, &stride,
+				&width, &height };
+
+			CUresult err = cuLaunchKernel(kernel,
+				BLOCK_COUNT_X(xsize), yend1 - yend0, 1,
+				BLOCK_SIZE_X, 1, 1,
+				0,
+				ocu.commandQueue, (void**)args, NULL);
+			LOG_CU_RESULT(err);
+
+			err = cuFinish(ocu.commandQueue);
+			LOG_CU_RESULT(err);
+		}
+	}
+
+	CUfunction kernel = ocu.kernel[KERNEL_COLORTRANSFORMYCBCRTORGB];
+	const void *args[] = { &cl_out };
+
+	CUresult err = cuLaunchKernel(kernel,
+		BLOCK_COUNT_X(xsize * ysize), 1, 1,
+		BLOCK_SIZE_X, 1, 1,
+		0,
+		ocu.commandQueue, (void**)args, NULL);
+	LOG_CU_RESULT(err);
+
+	err = cuFinish(ocu.commandQueue);
+	LOG_CU_RESULT(err);
+
+	cuMemcpyDtoH(rgb, cl_out, out_size);
+	ocu.releaseMem(cl_out);
+}
+
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
 #endif

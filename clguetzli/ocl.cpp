@@ -63,6 +63,10 @@ ocl_args_d_t& getOcl(void)
     ocl.kernel[KERNEL_COMPUTEBLOCKZEROINGORDER] = clCreateKernel(ocl.program, "clComputeBlockZeroingOrderEx", &err);
 	ocl.kernel[KERNEL_COPYFROMJPEGCOMPONENT] = clCreateKernel(ocl.program, "clCopyFromJpegComponentEx", &err);
 	ocl.kernel[KERNEL_APPLYGLOBALQUANTIZATION] = clCreateKernel(ocl.program, "clApplyGlobalQuantizationEx", &err);
+	ocl.kernel[KERNEL_COMPONENTSTOPIXELS] = clCreateKernel(ocl.program, "clComponentsToPixels", &err);
+	ocl.kernel[KERNEL_COMPONENTSTOPIXELS_EX1] = clCreateKernel(ocl.program, "clComponentsToPixelsEx1", &err);
+	ocl.kernel[KERNEL_COMPONENTSTOPIXELS_EX2] = clCreateKernel(ocl.program, "clComponentsToPixelsEx2", &err);
+	ocl.kernel[KERNEL_COLORTRANSFORMYCBCRTORGB] = clCreateKernel(ocl.program, "clColorTransformYCbCrToRGB", &err);
 
     return ocl;
 }

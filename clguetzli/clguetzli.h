@@ -179,6 +179,14 @@ void clApplyGlobalQuantization(
 	const int block_width,
 	const int block_height);
 
+void clComponentsToPixels(
+	uchar *rgb,/*out*/
+	const int xmin,
+	const int ymin,
+	const int xsize,
+	const int ysize,
+	const std::vector<guetzli::OutputImageComponent> &components /*in*/);
+
 class guetzli::OutputImage;
 
 #ifdef __USE_DOUBLE_AS_FLOAT__

@@ -96,6 +96,7 @@ __device__ int list_push_back(IntFloatPairList* list, int i, float f);
 __device__ void CoeffToIDCT(__private const coeff_t block[8 * 8], uchar out[8 * 8]);
 __device__ coeff_t Quantize(coeff_t raw_coeff, int quant);
 __device__ bool QuantizeBlock(coeff_t block[kDCTBlockSize], __global const int q[kDCTBlockSize]);
+__device__ void ColorTransformYCbCrToRGB(__global uchar pixel[3]);
 
 __kernel void clConvolutionEx(
 	__global float* result,
@@ -951,6 +952,134 @@ __kernel void clApplyGlobalQuantizationEx(
 			idct_g[i] = idct[i];
 		}
 	}
+}
+
+__kernel void clComponentsToPixels(
+	__global uchar *out,
+	const int xmin, 
+	const int ymin, 
+	const int xsize,
+	const int ysize,
+	const int stride,
+
+	__global const ushort *pixels,
+	const int width,
+	const int height)
+{ 
+	const int block_x = get_global_id(0);
+	const int block_y = get_global_id(1);
+
+	const int yend1 = ymin + ysize;
+	const int yend0 = min(yend1, height);
+
+	const int xend1 = xmin + xsize;
+	const int xend0 = min(xend1, width);
+
+	int y = ymin + block_y;
+	int x = xmin + block_x;
+
+	if (x >= xend0 || y >= yend0) return;
+
+	int px = y * width + x;
+
+	__global uchar *out_dst = out + ((xend0 - xmin)*block_y + block_x)*stride;
+
+	*out_dst = (uchar)((pixels[px] + 8 - (x & 1)) >> 4);
+}
+
+__kernel void clComponentsToPixelsEx1(
+	__global uchar *out,
+	const int xmin,
+	const int ymin,
+	const int xsize,
+	const int ysize,
+	const int stride,
+
+	const int width,
+	const int height)
+{
+	const int block_x = get_global_id(0);
+	const int block_y = get_global_id(1);
+
+	const int yend1 = ymin + ysize;
+	const int yend0 = min(yend1, height);
+
+	const int xend1 = xmin + xsize;
+	const int xend0 = min(xend1, width);
+
+	int x = xend0 + block_x;
+	int y = ymin + block_y;
+
+	if (x >= xend1 || y >= yend0) return;
+
+	__global uchar *out_dst = out + ((xend0 - xmin)*block_y + block_x) * stride;
+	__global uchar *out_src = out + ((xend0 - xmin)*block_y + xend0 - xmin- 1) * stride;
+
+	*out_dst = *out_src;
+	/*
+	int y = ymin;
+	for (; y < yend0; ++y) {
+		const int xend1 = xmin + xsize;
+		const int xend0 = std::min(xend1, width_);
+		int x = xmin;
+		int px = y * width_ + xmin;
+		for (; x < xend0; ++x, ++px, out += stride) {}
+
+		const int offset = -stride;
+		for (; x < xend1; ++x) {
+			*out = out[offset];
+			out += stride;
+		}
+	}
+	*/
+}
+
+__kernel void clComponentsToPixelsEx2(
+	__global uchar *out,
+	const int xmin,
+	const int ymin,
+	const int xsize,
+	const int ysize,
+	const int stride,
+
+	const int width,
+	const int height)
+{ 
+	const int block_x = get_global_id(0);
+	const int block_y = get_global_id(1);
+
+	const int yend1 = ymin + ysize;
+	const int yend0 = min(yend1, height);
+
+	const int xend1 = xmin + xsize;
+	const int xend0 = min(xend1, width);
+
+	int x = block_x;
+	int y = yend0 + block_y;
+
+	if (x >= xsize || y >= yend1) return;
+
+	__global uchar *out_dst = out + (xsize * block_y + block_x) * stride;
+	__global uchar *out_src = out + (xsize * (yend0 - ymin - 1) + block_x) * stride;
+
+	*out_dst = *out_src;
+	/*
+	int y = ymin;
+	for (; y < yend1; ++y) {
+		const int offset = -stride * xsize;
+		for (int x = 0; x < xsize; ++x) {
+			*out = out[offset];
+			out += stride;
+		}
+	}*/
+}
+
+__kernel void clColorTransformYCbCrToRGB(
+	__global uchar *rgb)
+{
+	const int block_x = get_global_id(0);
+
+	ColorTransformYCbCrToRGB(&rgb[block_x*3]);
 }
 
 __device__ void Butteraugli8x8CornerEdgeDetectorDiff(
@@ -2531,6 +2660,19 @@ __constant static uchar kRangeLimitLut[4 * 256] = {
 	255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 	255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 };
+
+__device__ void ColorTransformYCbCrToRGB(__global uchar pixel[3])
+{
+	__constant_ex uchar* kRangeLimit = kRangeLimitLut + 384;
+
+	int y = pixel[0];
+	int cb = pixel[1];
+	int cr = pixel[2];
+	pixel[0] = kRangeLimit[y + kCrToRedTable[cr]];
+	pixel[1] = kRangeLimit[y +
+		((kCrToGreenTable[cr] + kCbToGreenTable[cb]) >> 16)];
+	pixel[2] = kRangeLimit[y + kCbToBlueTable[cb]];
+}
 
 __device__ void YUVToRGB(__private uchar pixelBlock[3*8*8], int size /*= 8 * 8*/)
 {

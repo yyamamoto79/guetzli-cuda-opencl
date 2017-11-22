@@ -76,6 +76,10 @@ else
 	cuModuleGetFunction(&ocu.kernel[KERNEL_COMPUTEBLOCKZEROINGORDER], mod, "clComputeBlockZeroingOrderEx");
 	cuModuleGetFunction(&ocu.kernel[KERNEL_COPYFROMJPEGCOMPONENT], mod, "clCopyFromJpegComponentEx");
 	cuModuleGetFunction(&ocu.kernel[KERNEL_APPLYGLOBALQUANTIZATION], mod, "clApplyGlobalQuantizationEx");
+	cuModuleGetFunction(&ocu.kernel[KERNEL_COMPONENTSTOPIXELS], mod, "clComponentsToPixels");
+	cuModuleGetFunction(&ocu.kernel[KERNEL_COMPONENTSTOPIXELS_EX1], mod, "clComponentsToPixelsEx1");
+	cuModuleGetFunction(&ocu.kernel[KERNEL_COMPONENTSTOPIXELS_EX2], mod, "clComponentsToPixelsEx2");
+	cuModuleGetFunction(&ocu.kernel[KERNEL_COLORTRANSFORMYCBCRTORGB], mod, "clColorTransformYCbCrToRGB");
 
     cuCtxSetCacheConfig(CU_FUNC_CACHE_PREFER_SHARED);
     cuCtxSetSharedMemConfig(CU_SHARED_MEM_CONFIG_EIGHT_BYTE_BANK_SIZE);

@@ -931,6 +931,99 @@ void clApplyGlobalQuantization(
 	clReleaseMemObject(src_q);
 }
 
+void clComponentsToPixels(
+	uchar *rgb,/*out*/
+	const int xmin,
+	const int ymin,
+	const int xsize,
+	const int ysize,
+	const std::vector<guetzli::OutputImageComponent> &components /*in*/)
+{
+	using namespace guetzli;
+
+	ocl_args_d_t &ocl = getOcl();
+
+	const int stride = 3;
+
+	int out_size = xsize * ysize * stride * sizeof(uchar);
+	cl_mem cl_out = ocl.allocMem(out_size, rgb);
+
+	for (int c = 0; c < stride; ++c) 
+	{
+		cl_int err;
+		cl_buffer_region region;
+		region.origin = c;
+		region.size = out_size - c;
+		cl_mem cl_out_offset = clCreateSubBuffer(cl_out, CL_MEM_READ_WRITE, CL_BUFFER_CREATE_TYPE_REGION, &region, &err);
+
+		const int width = components[c].width();
+		const int height = components[c].height();
+
+		const int yend1 = ymin + ysize;
+		const int yend0 = std::min(yend1, height);
+		const int xend1 = xmin + xsize;
+		const int xend0 = std::min(xend1, width);
+
+		int pixels_size = width * height * sizeof(ushort);
+		cl_mem cl_pixels = ocl.allocMem(pixels_size, components[c].pixels());
+
+		{
+			cl_kernel kernel = ocl.kernel[KERNEL_COMPONENTSTOPIXELS];
+			clSetKernelArgEx(kernel,
+				&cl_out_offset, &xmin, &ymin, &xsize, &ysize, &stride,
+				&cl_pixels, &width, &height);
+
+			size_t globalWorkSize[2] = { xend0 - xmin, yend0 - ymin };
+			cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
+			LOG_CL_RESULT(err);
+			err = clFinish(ocl.commandQueue);
+			LOG_CL_RESULT(err);
+		}
+
+		clReleaseMemObject(cl_pixels);
+
+		if (xend1 - xend0 > 0) {
+			cl_kernel kernel = ocl.kernel[KERNEL_COMPONENTSTOPIXELS_EX1];
+			clSetKernelArgEx(kernel,
+				&cl_out_offset, &xmin, &ymin, &xsize, &ysize, &stride,
+				&width, &height);
+
+			size_t globalWorkSize[2] = { xend1 - xend0, yend0 - ymin };
+			cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
+			LOG_CL_RESULT(err);
+			err = clFinish(ocl.commandQueue);
+			LOG_CL_RESULT(err);
+		}
+
+		if (yend1 - yend0 > 0) {
+			cl_kernel kernel = ocl.kernel[KERNEL_COMPONENTSTOPIXELS_EX2];
+			clSetKernelArgEx(kernel,
+				&cl_out_offset, &xmin, &ymin, &xsize, &ysize, &stride,
+				&width, &height);
+
+			size_t globalWorkSize[2] = { xsize, yend1 - yend0 };
+			cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
+			LOG_CL_RESULT(err);
+			err = clFinish(ocl.commandQueue);
+			LOG_CL_RESULT(err);
+		}
+
+		clReleaseMemObject(cl_out_offset);
+	}
+	
+	cl_kernel kernel = ocl.kernel[KERNEL_COLORTRANSFORMYCBCRTORGB];
+	clSetKernelArgEx(kernel, &cl_out);
+
+	size_t globalWorkSize[2] = { xsize * ysize, 1 };
+	cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
+	LOG_CL_RESULT(err);
+	err = clFinish(ocl.commandQueue);
+	LOG_CL_RESULT(err);
+	
+	clEnqueueReadBuffer(ocl.commandQueue, cl_out, CL_TRUE, 0, out_size, rgb, 0, NULL, NULL);
+	clReleaseMemObject(cl_out);
+}
+
 #ifdef __USE_DOUBLE_AS_FLOAT__
 #undef double
 #endif

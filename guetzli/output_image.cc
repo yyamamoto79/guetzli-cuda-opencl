@@ -576,12 +576,56 @@ void OutputImage::SaveToJpegData(JPEGData* jpg) const {
 std::vector<uint8_t> OutputImage::ToSRGB(int xmin, int ymin,
                                          int xsize, int ysize) const {
   std::vector<uint8_t> rgb(xsize * ysize * 3);
-  for (int c = 0; c < 3; ++c) {
-    components_[c].ToPixels(xmin, ymin, xsize, ysize, &rgb[c], 3);
+  std::vector<uint8_t> rgb_gpu(xsize * ysize * 3);
+  if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode || MODE_CUDA == g_mathMode) {
+	
+	  if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode) {
+#ifdef __USE_OPENCL__
+		  clComponentsToPixels(rgb_gpu.data(), xmin, ymin, xsize, ysize, components_);
+#endif
+	  }
+	  else {
+#ifdef __USE_CUDA__
+		  cuComponentsToPixels(rgb_gpu.data(), xmin, ymin, xsize, ysize, components_);
+#endif
+	  }
+	  if (MODE_OPENCL == g_mathMode || MODE_CUDA == g_mathMode) {
+		  memcpy(rgb.data(), rgb_gpu.data(), rgb_gpu.size());
+	  }
   }
-  for (size_t p = 0; p < rgb.size(); p += 3) {
-    ColorTransformYCbCrToRGB(&rgb[p]);
+#ifdef __USE_OPENCL__
+  if (MODE_CPU_OPT == g_mathMode || MODE_CPU == g_mathMode || MODE_CHECKCL == g_mathMode)
+#else
+  if (MODE_CPU_OPT == g_mathMode || MODE_CPU == g_mathMode)
+#endif
+  {
+	  for (int c = 0; c < 3; ++c) 
+	  {
+		  components_[c].ToPixels(xmin, ymin, xsize, ysize, &rgb[c], 3);
+	  }
+	  for (size_t p = 0; p < rgb.size(); p += 3) {
+		  ColorTransformYCbCrToRGB(&rgb[p]);
+	  }
   }
+
+#ifdef __USE_OPENCL__
+  if (MODE_CHECKCL == g_mathMode)
+  {
+	  int count = 0;
+	  for (int i = 0; i < rgb_gpu.size(); i++)
+	  {
+		  if (rgb[i] != rgb_gpu[i])
+		  {
+			  count++;
+		  }
+	  }
+	  if (count > 0)
+	  {
+		  LogError("CHK %s(%d) %d:%d\r\n", "OutputImage::ToSRGB", __LINE__, count, rgb_gpu.size());
+	  }
+  }
+#endif
+
   return rgb;
 }
 
