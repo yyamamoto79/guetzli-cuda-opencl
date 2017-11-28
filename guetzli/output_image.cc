@@ -225,12 +225,34 @@ void OutputImageComponent::CopyFromJpegComponent(const JPEGComponent& comp,
 
 		if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode) {
 #ifdef __USE_OPENCL__
-			clCopyFromJpegComponent(output_coeff_gpu.data(), output_idct_gpu.data(), comp.coeffs.data(), quant, comp.width_in_blocks, comp.height_in_blocks, width_in_blocks_, height_in_blocks_, factor_x, width_, height_);
+			clCopyFromJpegComponent(
+				output_coeff_gpu.data(), 
+				output_idct_gpu.data(), 
+				comp.coeffs.data(), 
+				quant, 
+				comp.width_in_blocks, 
+				comp.height_in_blocks, 
+				width_in_blocks_, 
+				height_in_blocks_, 
+				factor_x, 
+				width_, 
+				height_);
 #endif
 		}
 		else {
 #ifdef __USE_CUDA__
-			cuCopyFromJpegComponent(output_coeff_gpu.data(), output_idct_gpu.data(), comp.coeffs.data(), quant, comp.width_in_blocks, comp.height_in_blocks, width_in_blocks_, height_in_blocks_, factor_x, width_, height_);
+			cuCopyFromJpegComponent(
+				output_coeff_gpu.data(), 
+				output_idct_gpu.data(), 
+				comp.coeffs.data(), 
+				quant, 
+				comp.width_in_blocks, 
+				comp.height_in_blocks, 
+				width_in_blocks_, 
+				height_in_blocks_, 
+				factor_x, 
+				width_, 
+				height_);
 #endif
 		}
 		for (int block_y = 0; block_y < height_in_blocks_; ++block_y) {

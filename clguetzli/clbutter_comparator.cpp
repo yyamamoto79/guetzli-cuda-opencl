@@ -1786,7 +1786,7 @@ namespace butteraugli
 
             clOpsinDynamicsImage(r, g, b, xsize, ysize);
         }
-		else if (MODE_CHECKCL == g_mathMode && xsize > 8 & ysize > 8)
+		else if (MODE_CHECKCL == g_mathMode && xsize > 8 && ysize > 8)
 		{
 			std::vector< std::vector<float>> orig_rgb = rgb;
 			_OpsinDynamicsImage(xsize, ysize, rgb);

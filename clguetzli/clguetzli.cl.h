@@ -4,23 +4,29 @@
 * Author: strongtu@tencent.com
 *         ianhuang@tencent.com
 *         chriskzhou@tencent.com
+*         stephendeng@tencent.com
 */
 #ifndef __CLGUETZLI_CL_H__
 #define __CLGUETZLI_CL_H__
 
-#ifdef __USE_OPENCL__
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
 
-#ifdef __cplusplus
-#ifndef __CUDACC__
+#if defined(__cplusplus) && !defined(__CUDACC__)
+
+#ifdef __USE_OPENCL__
 #include "CL/cl.h"
+#endif
+
+#ifdef __USE_CUDA__
 #include "cuda.h"
+typedef CUdeviceptr cu_mem;
 #endif
-#endif
+
+#endif/*__cplusplus && !__CUDACC__*/
 
 #define __USE_DOUBLE_AS_FLOAT__
 
-#ifdef __cplusplus
-#ifndef __CUDACC__
+#if defined(__cplusplus) && !defined(__CUDACC__)
     #define __kernel
     #define __private
     #define __global
@@ -30,7 +36,6 @@
 
     typedef unsigned char uchar;
     typedef unsigned short ushort;
-    typedef CUdeviceptr cu_mem;
 
     int get_global_id(int dim);
     int get_global_size(int dim);
@@ -66,6 +71,7 @@
             };
         }ocu_channels;
     #else
+#ifdef __USE_OPENCL__
         typedef union ocl_channels_t
         {
             struct
@@ -85,7 +91,8 @@
                 cl_mem ch[3];
             };
         }ocl_channels;
-
+#endif
+#ifdef __USE_CUDA__
         typedef union ocu_channels_t
         {
             struct
@@ -105,9 +112,9 @@
                 cu_mem ch[3];
             };
         }ocu_channels;
-    #endif
-#endif /*__CUDACC__*/
-#endif /*__cplusplus*/
+#endif
+    #endif /*__checkcl*/
+#endif /*__cplusplus && !__CUDACC__*/
 
 #ifdef __OPENCL_VERSION__
     #define __constant_ex __constant
@@ -143,7 +150,7 @@
         default: return gridDim.z * blockDim.z;
         }
     }
-
+	
 #endif /*__CUDACC__*/
 
     typedef short coeff_t;

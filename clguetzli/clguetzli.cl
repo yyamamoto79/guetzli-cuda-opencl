@@ -6,7 +6,7 @@
 *         chriskzhou@tencent.com
 *         stephendeng@tencent.com
 */
-#ifdef __USE_OPENCL__
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 #include  "clguetzli/clguetzli.cl.h"

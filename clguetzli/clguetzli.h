@@ -187,6 +187,10 @@ void clComponentsToPixels(
 	const int ysize,
 	const std::vector<guetzli::OutputImageComponent> &components /*in*/);
 
+#endif
+
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
+
 class guetzli::OutputImage;
 
 #ifdef __USE_DOUBLE_AS_FLOAT__

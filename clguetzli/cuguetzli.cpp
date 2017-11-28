@@ -317,11 +317,11 @@ void cuBlurEx(cu_mem image/*out, opt*/, const size_t xsize, const size_t ysize,
     const int xstep = std::max<int>(1, int(sigma / 3));
 
     ocu_args_d_t &ocu = getOcu();
-    cu_mem mem_expn = ocu.allocMem(sizeof(cl_float) * expn_size, expn.data());
+    cu_mem mem_expn = ocu.allocMem(sizeof(float) * expn_size, expn.data());
 
     if (xstep > 1)
     {
-        cu_mem m = ocu.allocMem(sizeof(cl_float) * xsize * ysize);
+        cu_mem m = ocu.allocMem(sizeof(float) * xsize * ysize);
         cuConvolutionXEx(m, image, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
         cuConvolutionYEx(result ? result : image, m, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
         cuSquareSampleEx(result ? result : image, result ? result : image, xsize, ysize, xstep, xstep);
@@ -329,7 +329,7 @@ void cuBlurEx(cu_mem image/*out, opt*/, const size_t xsize, const size_t ysize,
     }
     else
     {
-        cu_mem m = ocu.allocMem(sizeof(cl_float) * xsize * ysize);
+        cu_mem m = ocu.allocMem(sizeof(float) * xsize * ysize);
         cuConvolutionXEx(m, image, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
         cuConvolutionYEx(result ? result : image, m, xsize, ysize, mem_expn, expn_size, xstep, diff, border_ratio);
         ocu.releaseMem(m);

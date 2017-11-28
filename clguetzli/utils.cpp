@@ -19,7 +19,7 @@
  * Intel Corporation is the author of the Materials, and requests that all
  * problem reports or change requests be submitted to it directly
  *****************************************************************************/
-#ifdef __USE_OPENCL__
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,35 +105,5 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
     return errorCode;
 }
 #pragma warning( pop )
-
-timeCounter::timeCounter(const char *tag) {
-	this->tag = tag;
-#ifdef WINDOWS_IMPL
-	LARGE_INTEGER frequency;
-	LARGE_INTEGER timeStart;
-	QueryPerformanceFrequency(&frequency);
-	QueryPerformanceCounter(&timeStart);
-	this->timeStart = timeStart.QuadPart;
-	this->frequency = frequency.QuadPart;
-#elif  defined(LINUX_IMPL)
-	struct timeval tpstart;
-	gettimeofday(&tpstart, NULL);
-	tv_sec = tpstart.tv_sec;
-	tv_usec = tpstart.tv_usec;
-#endif
-}
-timeCounter::~timeCounter() {
-#ifdef WINDOWS_IMPL
-	LARGE_INTEGER timeEnd;
-	QueryPerformanceCounter(&timeEnd);
-	double elapsed = (timeEnd.QuadPart - timeStart) / frequency;
-	LogError("%s %.3fms\n", tag, elapsed * 1000);
-#elif  defined(LINUX_IMPL)
-	struct timeval tpend;
-	gettimeofday(&tpend, NULL);
-	double timeuse = 1000000 * (tpend.tv_sec - tv_sec) + tpend.tv_usec - tv_usec;
-	LogError("%s %.3fms\n", tag, timeuse / 1000);
-#endif
-}
 
 #endif

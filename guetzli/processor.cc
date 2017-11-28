@@ -580,7 +580,6 @@ void Processor::SelectFrequencyMasking(const JPEGData& jpg, OutputImage* img, co
 
     if (MODE_OPENCL == g_mathMode || MODE_CUDA == g_mathMode)
     {
-#ifdef __USE_OPENCL__
 		ButteraugliComparatorEx * comp = (ButteraugliComparatorEx*)comparator_;
 
         channel_info orig_channel[3];
@@ -601,8 +600,8 @@ void Processor::SelectFrequencyMasking(const JPEGData& jpg, OutputImage* img, co
         }
         output_order_gpu.resize(num_blocks * kBlockSize);
         output_order = output_order_gpu.data();
-
-        if (MODE_OPENCL == g_mathMode)
+#ifdef __USE_OPENCL__
+        if (MODE_OPENCL == g_mathMode || MODE_CHECKCL == g_mathMode)
         {
             clComputeBlockZeroingOrder(output_order,
                 orig_channel,
@@ -617,7 +616,7 @@ void Processor::SelectFrequencyMasking(const JPEGData& jpg, OutputImage* img, co
         }
 #endif
 #ifdef __USE_CUDA__
-        else
+        if(MODE_CUDA == g_mathMode)
         {
             cuComputeBlockZeroingOrder(output_order,
                 orig_channel,
@@ -1050,7 +1049,7 @@ bool Process(const Params& params, ProcessStats* stats,
   }
   std::unique_ptr<ButteraugliComparator> comparator;
   if (jpg.width >= 32 && jpg.height >= 32) {
-#ifdef __USE_OPENCL__
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
     comparator.reset(
         new ButteraugliComparatorEx(jpg.width, jpg.height, &rgb,
                                   params.butteraugli_target, stats));
@@ -1169,7 +1168,7 @@ bool Process(const Params& params, ProcessStats* stats,
   }
   std::unique_ptr<ButteraugliComparator> comparator;
   if (jpg.width >= 32 && jpg.height >= 32) {
-#ifdef __USE_OPENCL__
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
     comparator.reset(
         new ButteraugliComparatorEx(jpg.width, jpg.height, &rgb,
                                   params.butteraugli_target, stats));

@@ -306,10 +306,6 @@ int main(int argc, char** argv) {
     Usage();
   }
 
-#ifdef __USE_OPENCL__
-  timeCounter timer("guetzli");
-#endif
-
   std::string in_data = ReadFileOrDie(argv[opt_idx]);
   std::string out_data;
 

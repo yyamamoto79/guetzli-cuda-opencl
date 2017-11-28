@@ -10,7 +10,7 @@
 #include <vector>
 #include "utils.h"
 
-#ifdef __USE_OPENCL__
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
 
 using namespace std;
 
