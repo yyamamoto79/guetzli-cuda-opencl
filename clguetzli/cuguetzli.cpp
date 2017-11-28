@@ -17,8 +17,8 @@
 #endif
 
 #define cuFinish cuStreamSynchronize
-#define BLOCK_SIZE_X 16
-#define BLOCK_SIZE_Y 16
+#define BLOCK_SIZE_X 64
+#define BLOCK_SIZE_Y 1
 #define BLOCK_COUNT_X(size)    ((size + BLOCK_SIZE_X - 1) / BLOCK_SIZE_X)
 #define BLOCK_COUNT_Y(size)    ((size + BLOCK_SIZE_Y - 1) / BLOCK_SIZE_Y)
 
