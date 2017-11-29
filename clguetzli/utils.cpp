@@ -25,18 +25,8 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <stdarg.h>
-#include "CL/cl.h"
-#include "CL/cl_ext.h"
 #include "utils.h"
 #include <assert.h>
-
-#if defined(_WIN32) || defined(WIN32)        /**Windows*/
-#define WINDOWS_IMPL
-#include <windows.h>
-#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(BSD)    /**Linux*/
-#define LINUX_IMPL
-#include <sys/time.h>        //gettimeofday()
-#endif
 
 //we want to use POSIX functions
 #pragma warning( push )
@@ -74,7 +64,7 @@ void LogError(const char* str, ...)
 // and should be deallocated by the caller
 int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
 {
-    int errorCode = CL_SUCCESS;
+    int errorCode = RSEC_SUCCESS;
 
     FILE* fp = NULL;
 #ifdef __linux__
@@ -85,7 +75,7 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
     if (fp == NULL)
     {
         LogError("Error: Couldn't find program source file '%s'.\n", fileName);
-        errorCode = CL_INVALID_VALUE;
+        errorCode = RSEC_FILE_NOT_EXIST;
     }
     else {
         fseek(fp, 0, SEEK_END);
@@ -96,7 +86,7 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
         if (*source == NULL)
         {
             LogError("Error: Couldn't allocate %d bytes for program source from file '%s'.\n", *sourceSize, fileName);
-            errorCode = CL_OUT_OF_HOST_MEMORY;
+            errorCode = RSEC_OUT_OF_HOST_MEMORY;
         }
         else {
             fread(*source, 1, *sourceSize, fp);
