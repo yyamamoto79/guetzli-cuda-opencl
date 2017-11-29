@@ -906,7 +906,6 @@ void cuCopyFromJpegComponent(
 	const int jpeg_block_height,
 	const int output_block_width,
 	const int output_block_height,
-	const int factor,
 	const int output_width,
 	const int output_height)
 {
@@ -930,7 +929,7 @@ void cuCopyFromJpegComponent(
 	const void *args[] = { &dst_coeff, &dst_idct,
 		&src_coeff, &src_quant, &jpeg_block_width, &jpeg_block_height,
 		&output_block_width, &output_block_height,
-		&factor, &output_width, &output_height };
+		&output_width, &output_height };
 
 	CUresult err = cuLaunchKernel(kernel,
 		BLOCK_COUNT_X(output_block_width), BLOCK_COUNT_Y(output_block_height), 1,

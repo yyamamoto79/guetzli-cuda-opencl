@@ -144,7 +144,6 @@ void cuCopyFromJpegComponent(
 	const int jpeg_block_height,
 	const int output_block_width,
 	const int output_block_height,
-	const int factor,
 	const int output_width,
 	const int output_height);
 

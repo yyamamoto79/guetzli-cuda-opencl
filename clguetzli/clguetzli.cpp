@@ -844,7 +844,6 @@ void clCopyFromJpegComponent(
 	const int jpeg_block_height,
 	const int output_block_width,
 	const int output_block_height,
-	const int factor,
 	const int output_width,
 	const int output_height)
 {
@@ -867,8 +866,8 @@ void clCopyFromJpegComponent(
 	cl_kernel kernel = ocl.kernel[KERNEL_COPYFROMJPEGCOMPONENT];
 	clSetKernelArgEx(kernel, &dst_coeff, &dst_idct,
 		&src_coeff, &src_quant, &jpeg_block_width, &jpeg_block_height,
-		&output_block_width, &output_block_height,
-		&factor, &output_width, &output_height);
+		&output_block_width, &output_block_height, 
+		&output_width, &output_height);
 
 	size_t globalWorkSize[2] = { output_block_width, output_block_height };
 	cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);

@@ -888,7 +888,6 @@ __kernel void clCopyFromJpegComponentEx(
 	const int  jpeg_block_height,
     const int  output_block_width,
 	const int  output_block_height,
-    const int factor,
     const int output_width_, 
     const int output_height_)
 { 

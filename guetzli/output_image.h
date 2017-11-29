@@ -80,6 +80,12 @@ class OutputImageComponent {
   void UpdatePixelsForBlock(int block_x, int block_y,
                             const uint8_t idct[kDCTBlockSize]);
 
+  void _CopyFromJpegComponent(const JPEGComponent& comp,
+							  int factor_x, int factor_y,
+							  const int* quant);
+
+  void _ApplyGlobalQuantization(const int q[kDCTBlockSize]);
+
   const int width_;
   const int height_;
   int factor_x_;
@@ -147,6 +153,10 @@ class OutputImage {
                    std::vector<std::vector<float> >* rgb) const;
 
   std::string FrameTypeStr() const;
+
+private:
+  void _ToSRGB(std::vector<uint8_t> &rgb, int xmin, int ymin,
+		       int xsize, int ysize) const;
 
  private:
   const int width_;
