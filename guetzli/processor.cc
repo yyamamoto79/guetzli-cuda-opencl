@@ -577,7 +577,7 @@ void Processor::SelectFrequencyMasking(const JPEGData& jpg, OutputImage* img, co
     std::vector<CoeffData> output_order_cpu;
 
 	CoeffData * output_order = NULL;
-
+#if defined(__USE_OPENCL__) || defined(__USE_CUDA__)
     if (MODE_OPENCL == g_mathMode || MODE_CUDA == g_mathMode)
     {
 		ButteraugliComparatorEx * comp = (ButteraugliComparatorEx*)comparator_;
@@ -631,6 +631,7 @@ void Processor::SelectFrequencyMasking(const JPEGData& jpg, OutputImage* img, co
         }
 #endif
     }
+#endif
 #ifdef __USE_OPENCL__
     if (MODE_CPU_OPT == g_mathMode || MODE_CPU == g_mathMode || MODE_CHECKCL == g_mathMode)
 #else
