@@ -104,7 +104,7 @@ before encoding.
 
 **Note:** Please make sure that you can build guetzli successfully before adding the following features.
 
-## Enable CUDA/OpenCL support
+## Enable CUDA support
 
 **Note:** Before adding [CUDA](https://developer.nvidia.com/cuda-zone) support, please [check](http://developer.nvidia.com/cuda-gpus) whether your GPU support CUDA or not.
 
@@ -114,21 +114,59 @@ before encoding.
 
 ### On POSIX systems
 1. Follow the [Installation Guide for Linux ](https://developer.nvidia.com/compute/cuda/8.0/Prod2/docs/sidebar/CUDA_Installation_Guide_Linux-pdf) to setup [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit).
-2. Edit `premake5.lua`, add `defines { "__USE_OPENCL__", "__USE_CUDA__" }` and `links { "OpenCL", "cuda" }` under `filter "action:gmake"`. Then do `premake5 --os=linux gmake` to update the makefile.
-3. Edit `clguetzli/clguetzli.cl` and add `#define __USE_OPENCL__` at first line.
-4. Run `make` and expect the binary to be created in `bin/Release/guetzli`.
+2. Edit `premake5.lua`, add `$(CUDA_PATH)\include` to includedirs under workspace "guetzli", add `defines { "__USE_CUDA__" }` and `links { "cuda" }` under `filter "action:gmake"`. Then do `premake5 --os=linux gmake` to update the makefile.
+3. Edit `clguetzli/clguetzli.cl` and add `#define __USE_CUDA__ at first line.
+4. Run `make` and wait the binary to be created in `bin/Release/guetzli`.
 5. Run `./compile.sh 64` or `./compile.sh 32` to build the 64 or 32 bits [ptx](http://docs.nvidia.com/cuda/parallel-thread-execution) file, and the ptx file will be copied to `bin/Release/clguetzli`.
 
 ### On Windows
 1. Follow the [Installation Guide for Microsoft Windows](https://developer.nvidia.com/compute/cuda/8.0/Prod2/docs/sidebar/CUDA_Installation_Guide_Windows-pdf) to setup `CUDA Toolkit`.
-2. Copy `<vs2015 dir>\VC\bin\amd64\vcvars64.bat` as `<guetzli dir>\vcvars64.bat`
+2. Copy `<vs2015 dir>\VC\bin\amd64\vcvars64.bat` to `<guetzli dir>\vcvars64.bat`.
 3. Open the Visual Studio project and edit the project `Property Pages` as follows:
-    * Add `__USE_OPENCL__` and `__USE_CUDA__` to preprocessor definitions.
-    * Add `OpenCL.lib` and `cuda.lib` to additional dependencies.
+    * Add `__USE_CUDA__` to preprocessor definitions.
+    * Add `cuda.lib` to additional dependencies.
     * Add `$(CUDA_PATH)\include` to include directories.
     * Add `$(CUDA_PATH)\lib\Win32` or `$(CUDA_PATH)\lib\x64` to library directories.
+4. Edit `clguetzli/clguetzli.cl` and add `#define __USE_CUDA__` at first line.
+5. Build.
+
+## Enable OpenCL support
+
+### On POSIX systems
+1. Follow the [Installation Guide for Linux ](https://software.intel.com/en-us/articles/sdk-for-opencl-gsg) to setup [Intel OpenCL SDK](https://software.intel.com/en-us/intel-opencl).
+2. Edit `premake5.lua`, add `$(OPENCL_SDK_PATH)\include` to includedirs under workspace "guetzli", add `defines { "__USE_OPENCL__" }` and `links { "**" }` under `filter "action:gmake"`. Then execute `premake5 --os=linux gmake` to update the makefile.
+3. Edit `clguetzli/clguetzli.cl` and add `#define __USE_OPENCL__ at first line.
+4. Run `make` and wait the binary to be created in `bin/Release/guetzli`.
+5. Copy `clguetzli/clguetzli.cl` to `bin/Release/clguetzli` before running.
+
+### On Windows
+1. Follow the [Installation Guide for Microsoft Windows](https://software.intel.com/en-us/articles/getting-started-with-opencl-code-builder) to setup `Intel OpenCL SDK`.
+2. Copy `<vs2015 dir>\VC\bin\amd64\vcvars64.bat` as `<guetzli dir>\vcvars64.bat`
+3. Open the Visual Studio project and edit the project `Property Pages` as follows:
+    * Add `__USE_OPENCL__` to preprocessor definitions.
+    * Add `OpenCL.lib` to additional dependencies.
+    * Add `$(OPENCL_SDK_PATH)\include` to include directories.
+    * Add `$(OPENCL_SDK_PATH)\lib\x86` or `$(OPENCL_SDK_PATH)\lib\x64` to library directories.
 4. Edit `clguetzli/clguetzli.cl` and add `#define __USE_OPENCL__` at first line.
-5. Build it.
+5. Edit `Property Pages` to turn on the `Excluded From Build` property of `clguetzli/clguetzli.cu`.
+5. Build.
+
+## Enable 'tcmalloc' support to speed up memory access. ('tcmalloc' can save 3% encoding time.)
+### On POSIX systems
+1. Dowload google-perftools from https://github.com/gperftools/gperftools/releases
+2. Install google-perftools: ./configure && make && make install
+3. Add '/usr/local/lib' to library path if not exist
+    *  echo "/usr/local/lib" > /etc/ld.so.conf.d/usr_local_lib.conf
+    *  ldconfig
+4. Edit 'premake5.lua', add 'tcmalloc' to `links { ** }` under `filter "action:gmake"`. Then execute `premake5 --os=linux gmake` to update the makefile.
+5. On 64 bits system, libunwind is required
+    * Dowload libunwind from http://download.savannah.gnu.org/releases/libunwind
+    * Install libunwind by ./configure && make && make install
+6. Run 'make'
+
+### On Windows
+1. Follow the READdME file [https://github.com/gperftools/gperftools/blob/master/README_windows.txt] to use tcmalloc_minimal 
+2. Build.
 
 ### Usage
 ```bash
@@ -137,7 +175,7 @@ guetzli [--c|--cuda|--opencl] [other options] original.jpg output.jpg
 ```
 You can pass a `--c` parameter to enable the procedure optimization or `--cuda` parameter to use the CUDA acceleration or `--opencl` to use the OpenCL acceleration.
 
-If you have any question about CUDA/OpenCL support, please contact strongtu@tencent.com, ianhuang@tencent.com or chriskzhou@tencent.com.
+If you have any question about CUDA/OpenCL support, please contact strongtu@tencent.com, ianhuang@tencent.com, chriskzhou@tencent.com or stephendeng@tencent.com.
 
 ## Enable full JPEG format support
 ### On POSIX systems
@@ -150,8 +188,8 @@ If you have any question about CUDA/OpenCL support, please contact strongtu@tenc
     *   On Arch Linux, do `pacman -S libjpeg`.
     *   On Alpine Linux, do `apk add libjpeg`.
 2. Edit `premake5.lua`, add `defines {"__SUPPORT_FULL_JPEG__"}` and `links { "jpeg" }` under `filter "action:gmake"`. Then do `premake5 --os=linux gmake` to update the makefile.
-3. Run `make` and expect the binary to be created in `bin/Release/guetzli`
+3. Run `make` and wait the binary to be created in `bin/Release/guetzli`
 ### On Windows
 1. Install `libjpeg-turbo` using vcpkg: `.\vcpkg install libjpeg-turbo`
 2. Open the Visual Studio project and add `__SUPPORT_FULL_JPEG__` to preprocessor definitions in the project `Property Pages`.
-3. Build it.
+3. Build.
