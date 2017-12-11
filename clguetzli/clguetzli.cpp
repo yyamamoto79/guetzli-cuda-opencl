@@ -240,7 +240,8 @@ void clConvolutionXEx(
 	cl_kernel kernel = ocl.kernel[KERNEL_CONVOLUTIONX];
     clSetKernelArgEx(kernel, &result, &xsize, &ysize, &inp, &multipliers, &len, &xstep, &offset, &border_ratio);
 
-	size_t globalWorkSize[2] = { xsize, ysize };
+	size_t x_count = (xsize + xstep - 1) / xstep;
+	size_t globalWorkSize[2] = { x_count, ysize };
 	cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
     LOG_CL_RESULT(err);
 	err = clFinish(ocl.commandQueue);
@@ -258,7 +259,9 @@ void clConvolutionYEx(
 	cl_kernel kernel = ocl.kernel[KERNEL_CONVOLUTIONY];
     clSetKernelArgEx(kernel, &result, &xsize, &ysize, &inp, &multipliers, &len, &xstep, &offset, &border_ratio);
 
-	size_t globalWorkSize[2] = { xsize, ysize };
+	size_t x_count = (xsize + xstep - 1) / xstep;
+	size_t y_count = (ysize + xstep - 1) / xstep;
+	size_t globalWorkSize[2] = { x_count, y_count };
 	cl_int err = clEnqueueNDRangeKernel(ocl.commandQueue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
     LOG_CL_RESULT(err);
 	err = clFinish(ocl.commandQueue);

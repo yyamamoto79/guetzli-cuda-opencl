@@ -146,7 +146,7 @@ __kernel void clConvolutionXEx(
 	__global const float* multipliers, const int len, 
 	const int step, const int offset, const float border_ratio)
 {
-    const int x = get_global_id(0);
+    const int x = get_global_id(0) * step;
     const int y = get_global_id(1);
 
     if (x >= xsize || y >= ysize) return;
@@ -187,8 +187,8 @@ __kernel void clConvolutionYEx(
 	__global const float* multipliers, const int len, 
     const int step, const int offset, const float border_ratio)
 {
-    const int x = get_global_id(0);
-    const int y = get_global_id(1);
+    const int x = get_global_id(0) * step;
+    const int y = get_global_id(1) * step;
 
     if (x >= xsize || y >= ysize) return;
     if (x % step != 0) return;

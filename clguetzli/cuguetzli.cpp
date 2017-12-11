@@ -249,8 +249,9 @@ void cuConvolutionXEx(
 	CUfunction kernel = ocu.kernel[KERNEL_CONVOLUTIONX];
     const void *args[] = { &result, &xsize, &ysize, &inp, &multipliers, &len, &xstep, &offset, &border_ratio };
 
+	size_t x_count = (xsize + xstep - 1) / xstep;
     CUresult err = cuLaunchKernel(kernel,
-        BLOCK_COUNT_X(xsize), BLOCK_COUNT_Y(ysize), 1,
+        BLOCK_COUNT_X(x_count), BLOCK_COUNT_Y(ysize), 1,
         BLOCK_SIZE_X, BLOCK_SIZE_Y, 1,
         0,
         ocu.commandQueue, (void**)args, NULL);
@@ -270,8 +271,10 @@ void cuConvolutionYEx(
 	CUfunction kernel = ocu.kernel[KERNEL_CONVOLUTIONY];
     const void *args[] = { &result, &xsize, &ysize, &inp, &multipliers, &len, &xstep, &offset, &border_ratio };
 
+	size_t x_count = (xsize + xstep - 1) / xstep;
+	size_t y_count = (ysize + xstep - 1) / xstep;
     CUresult err = cuLaunchKernel(kernel,
-        BLOCK_COUNT_X(xsize), BLOCK_COUNT_Y(ysize), 1,
+        BLOCK_COUNT_X(x_count), BLOCK_COUNT_Y(y_count), 1,
         BLOCK_SIZE_X, BLOCK_SIZE_Y, 1,
         0,
         ocu.commandQueue, (void**)args, NULL);
