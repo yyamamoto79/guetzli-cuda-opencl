@@ -82,7 +82,7 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
         *sourceSize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
-        *source = new char[*sourceSize];
+        *source = new char[*sourceSize + 1];
         if (*source == NULL)
         {
             LogError("Error: Couldn't allocate %d bytes for program source from file '%s'.\n", *sourceSize, fileName);
@@ -90,6 +90,7 @@ int ReadSourceFromFile(const char* fileName, char** source, size_t* sourceSize)
         }
         else {
             fread(*source, 1, *sourceSize, fp);
+			(*source)[*sourceSize] = '\0';
         }
     }
     return errorCode;
