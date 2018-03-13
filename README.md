@@ -110,7 +110,7 @@ before encoding.
 
 **Note:** If you don't have an NVIDIA card that support CUDA, you can try [OpenCL](https://www.khronos.org/opencl/) instead. You can install any of the OpenCL SDKs, such as [Intel OpenCL SDK](https://software.intel.com/en-us/intel-opencl), [AMD OpenCL SDK](http://developer.amd.com/tools-and-sdks/opencl-zone/), etc.
 
-**Note:** The steps for adding OpenCL support is very similar with adding CUDA support, so the following introduction will be only for CUDA.
+**Note:** The steps for adding OpenCL support is very similar with adding CUDA support.
 
 ### On POSIX systems
 1. Follow the [Installation Guide for Linux ](https://developer.nvidia.com/compute/cuda/8.0/Prod2/docs/sidebar/CUDA_Installation_Guide_Linux-pdf) to setup [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit).
@@ -129,6 +129,7 @@ before encoding.
     * Add `$(CUDA_PATH)\lib\Win32` or `$(CUDA_PATH)\lib\x64` to library directories.
 4. Edit `clguetzli/clguetzli.cl` and add `#define __USE_CUDA__` at first line.
 5. Build.
+6. Copy "clguetzli\clguetzli.cu.ptx32(or ptx64)" to "$(OutDir)clguetzli\" before running.
 
 ## Enable OpenCL support
 
