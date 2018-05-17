@@ -12,14 +12,12 @@ sequential (nonprogressive) JPEGs due to faster decompression speeds they offer.
 Guetzli is an awesome jpeg encoder, however, it works a little bit slow. In order to speed it up, we have added CUDA & OpenCL support for Guetzli, optimized some procedure and added full jpeg format support.
 We tested it on our GPU server(single Tesla M40 GPU), and the test result with one of our sample pictures(750*400 in size) is as below.
 
-|------------------------------------------------------------------------|
-|Method	              | Usage	                               |  Cost   |
-|------------------------------------------------------------------------|
-|Original	          | guetzli <in file> <out file>	       |  14.7s  |
-|Procedure Optimized  | guetzli --c <in file> <out file>	   |  8.2s   |
-|Using OpenCL	      | guetzli --opencl <in file> <out file>  |  1.5s   |
-|Using CUDA	          | guetzli --cuda <in file> <out file>	   |  0.8s   |
-|------------------------------------------------------------------------|
+|Method|Usage|Cost|
+| :- | :- | :- | 
+|Original|guetzli \<in file> \<out file>|14.7s|
+|Procedure Optimized| guetzli --c \<in file> \<out file>|8.2s|
+|Using OpenCL|guetzli --opencl \<in file> \<out file>|1.5s|
+|Using CUDA|guetzli --cuda \<in file> \<out file>|0.8s|
 
 # Building
 
