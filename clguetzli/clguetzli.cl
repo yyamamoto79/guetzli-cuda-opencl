@@ -635,6 +635,7 @@ __kernel void clDoMaskEx(
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
+	if (x >= xsize || y >= ysize) return;
 
 	const double w00 = 232.206464018;
 	const double w11 = 22.9455222245;
@@ -669,6 +670,7 @@ __kernel void clCombineChannelsEx(
 {
     const int res_x = get_global_id(0) * step;
     const int res_y = get_global_id(1) * step;
+    if (res_x + (8 - step) >= xsize || res_y + (8 - step) >= ysize) return;
 
     double mask[3];
     double dc_mask[3];
